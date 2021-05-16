@@ -1,6 +1,4 @@
-
 export class Page<T> {
-    
     private _totalElements: number;
     private _totalPages: number;
     private _amount: number;
@@ -34,5 +32,4 @@ export class Page<T> {
     public get elements(): Array<T> {
         return this._elements;
     }
-
 }

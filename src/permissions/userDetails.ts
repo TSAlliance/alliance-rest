@@ -1,7 +1,6 @@
 import { ApiError } from "../error/apiError";
 
 export abstract class UserDetails {
-
     public readonly id: string;
     private readonly _permissions: string[] = [];
     private readonly _hierarchy: number = 0;
@@ -15,6 +14,5 @@ export abstract class UserDetails {
         this.isAuthenticated = isAuthenticated;
     }
 
-    public abstract hasPermission(permission: string): boolean
-
+    public abstract hasPermission(permission: string): boolean;
 }

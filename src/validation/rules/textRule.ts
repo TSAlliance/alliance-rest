@@ -1,17 +1,16 @@
 import { ValidationRule } from "./validationRule";
 
 export class TextRule extends ValidationRule<string> {
-
     private _maxLen: number = -1;
     private _minLen: number = -1;
     private _alpha: boolean = false;
     private _alphaNum: boolean = false;
-    
+
     /**
      * Set maximum length of subject
      * @param len Maximum length
      */
-     public maxLen(len: number): this {
+    public maxLen(len: number): this {
         this._maxLen = len;
         return this;
     }
@@ -20,7 +19,7 @@ export class TextRule extends ValidationRule<string> {
      * Set minimum length of subject
      * @param len Minimum length
      */
-     public minLen(len: number): this {
+    public minLen(len: number): this {
         this._minLen = len;
         return this;
     }
@@ -44,8 +43,8 @@ export class TextRule extends ValidationRule<string> {
     }
 
     public test(): void {
-        if(this.subject.length == 0) {
-            if(this.isRequired) {
+        if (this.subject.length == 0) {
+            if (this.isRequired) {
                 this.putFailedTest("required", false, true);
                 return;
             }
@@ -66,6 +65,4 @@ export class TextRule extends ValidationRule<string> {
             this.putFailedTest("alphaNum", false, true);
         }
     }
-
-
 }

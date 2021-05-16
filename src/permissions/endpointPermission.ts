@@ -1,6 +1,4 @@
-
 export class EndpointPermission {
-
     public value: string;
     public action: string;
 
@@ -8,5 +6,4 @@ export class EndpointPermission {
         this.value = value;
         this.action = action;
     }
-
 }

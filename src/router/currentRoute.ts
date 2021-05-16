@@ -4,7 +4,6 @@ import { UserDetails } from "../permissions/userDetails";
 import { Pageable } from "../pagination/pageable";
 
 export interface CurrentRoute extends RouteRecord {
-
     request: Request;
     response: Response;
     query: any;
@@ -12,5 +11,4 @@ export interface CurrentRoute extends RouteRecord {
     params: any;
     pageable?: Pageable;
     userDetails?: UserDetails;
-
 }

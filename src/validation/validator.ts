@@ -9,7 +9,6 @@ import { HashMap } from "../util/hashMap";
 import { ValidationException } from "../error/validationError";
 
 export class Validator {
-
     private _rules: Array<ValidationRule<any>> = [];
 
     public text(fieldname: string, subject: string): TextRule {
@@ -33,18 +32,19 @@ export class Validator {
     }
 
     public throwErrors(): void {
-        let errors: Array<HashMap<any>> = this._rules.filter(rule => rule.failedTests.length > 0).map(rule => {
-            let details: HashMap<any> = {};
+        let errors: Array<HashMap<any>> = this._rules
+            .filter((rule) => rule.failedTests.length > 0)
+            .map((rule) => {
+                let details: HashMap<any> = {};
 
-            details["fieldname"] = rule.fieldname;
-            details["failedTests"] = rule.failedTests;
+                details["fieldname"] = rule.fieldname;
+                details["failedTests"] = rule.failedTests;
 
-            return details;
-        });
+                return details;
+            });
 
-        if(errors.length > 0) {
+        if (errors.length > 0) {
             throw new ValidationException(errors);
         }
     }
-
 }

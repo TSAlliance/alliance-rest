@@ -1,8 +1,7 @@
 import { UniqueValidationFunction } from "../functions/uniqueValidationFunction";
-import { HashMap } from "../../map/hashMap";
+import { HashMap } from "../../util/hashMap";
 
 export abstract class ValidationRule<T> {
-
     private readonly _subject: T;
     private readonly _fieldname: string;
     private readonly _failedTests: Array<HashMap<any>> = [];
@@ -29,7 +28,7 @@ export abstract class ValidationRule<T> {
     public get isRequired(): boolean {
         return this._required;
     }
-    
+
     /**
      * Check if a value is unique
      * @param uniqueValidationFn Function for validation
@@ -54,11 +53,11 @@ export abstract class ValidationRule<T> {
      * @return True or False
      * @throws ValidationException ValidationException
      */
-     public check(): boolean {
-        if(this.needsValidation() && this.testInternal()) {
+    public check(): boolean {
+        if (this.needsValidation() && this.testInternal()) {
             this.test();
         } else {
-            if(this._required) {
+            if (this._required) {
                 this.putFailedTest("required", false, this._required);
                 return false;
             }
@@ -82,9 +81,9 @@ export abstract class ValidationRule<T> {
         this.checkForAndDeleteExistingTest(testName);
 
         this._failedTests.push({
-            "name": testName,
-            "expected": expectedValue,
-            "found": foundValue
+            name: testName,
+            expected: expectedValue,
+            found: foundValue,
         });
     }
 
@@ -92,9 +91,9 @@ export abstract class ValidationRule<T> {
      * Check if a test already failed and delete from list
      * @param testName Test's name
      */
-     private checkForAndDeleteExistingTest(testName: string): void {
+    private checkForAndDeleteExistingTest(testName: string): void {
         const item = this._failedTests.find((item: HashMap<any>) => {
-            if(item["name"] === testName) {
+            if (item["name"] === testName) {
                 return item;
             }
         });
@@ -107,12 +106,12 @@ export abstract class ValidationRule<T> {
      * Perform internal tests like testing for null or unique
      */
     private testInternal(): boolean {
-        if(this._subject == null) {
+        if (this._subject == null) {
             this.putFailedTest("required", false, true);
             return false;
         }
 
-        if(this._uniqueValidationFunction != null && this._uniqueValidationFunction(this._subject)) {
+        if (this._uniqueValidationFunction != null && this._uniqueValidationFunction(this._subject)) {
             this.putFailedTest("unique", false, true);
         }
 
@@ -123,18 +122,18 @@ export abstract class ValidationRule<T> {
      * Check if a value exists and therefor if validation is required or not
      * @return True or False
      */
-     protected needsValidation(): boolean {
+    protected needsValidation(): boolean {
         let needsValidation: boolean;
 
-        if(this._required) {
+        if (this._required) {
             return true;
         }
 
         // Check if subject is null, return false
-        if(this._subject == null) {
+        if (this._subject == null) {
             return false;
         } else {
-            if(typeof this._subject == "string") {
+            if (typeof this._subject == "string") {
                 needsValidation = this._subject.length != 0;
             } else {
                 needsValidation = true;
@@ -143,5 +142,4 @@ export abstract class ValidationRule<T> {
 
         return needsValidation;
     }
-
 }

@@ -1,7 +1,6 @@
 import { HashMap } from "../util/hashMap";
 
 export abstract class ApiError extends Error {
-
     private readonly _response: HashMap<any> = {};
     private readonly _httpStatusCode: number = 400;
 
@@ -32,11 +31,10 @@ export abstract class ApiError extends Error {
     protected abstract getErrorCode(): string;
 
     public get response(): HashMap<any> {
-        return this._response
+        return this._response;
     }
 
     public get httpStatus(): number {
         return this._httpStatusCode;
     }
-
 }

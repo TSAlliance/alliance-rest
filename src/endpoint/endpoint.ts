@@ -2,7 +2,6 @@ import { EndpointFlag } from "../flags/endpointFlag";
 import { EndpointPermission } from "../permissions/endpointPermission";
 
 export abstract class Endpoint {
-
     private _flags: EndpointFlag[] = [];
     private _permissions: EndpointPermission[];
 
@@ -25,8 +24,8 @@ export abstract class Endpoint {
      * @returns True or False
      */
     public isActionRequiringAuth(action: string): boolean {
-        for(let permission of this._permissions) {
-            if(permission.action === action) {
+        for (let permission of this._permissions) {
+            if (permission.action === action) {
                 return true;
             }
         }
@@ -39,7 +38,7 @@ export abstract class Endpoint {
      * @returns EndpointPermissions array
      */
     public getPermissions(): EndpointPermission[] {
-        return this._permissions
+        return this._permissions;
     }
 
     /**
@@ -48,7 +47,8 @@ export abstract class Endpoint {
      * @returns EndpointPermission
      */
     public getPermissionForAction(action: string): EndpointPermission {
-        return this._permissions.find((permission) => { permission.action.toLowerCase() === action.toLowerCase() });
+        return this._permissions.find((permission) => {
+            permission.action.toLowerCase() === action.toLowerCase();
+        });
     }
-
 }

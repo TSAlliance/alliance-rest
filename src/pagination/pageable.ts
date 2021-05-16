@@ -1,20 +1,18 @@
-
 export class Pageable {
-
     private _size: number;
     private _page: number;
-    
+
     constructor(size: number, page: number) {
         this._size = size;
         this._page = page;
     }
 
     public get size(): number {
-        return this._size
+        return this._size;
     }
 
     public get page(): number {
-        return this._page
+        return this._page;
     }
 
     public get offset(): number {
@@ -24,5 +22,4 @@ export class Pageable {
     public static of(size: number, page: number) {
         return new Pageable(size, page);
     }
-
 }

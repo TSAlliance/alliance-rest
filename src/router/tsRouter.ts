@@ -1,4 +1,4 @@
-import Express, { Request, Response } from 'express'
+import Express, { Request, Response } from "express";
 
 import { RouteGroup } from "./routeGroup";
 import { CurrentRoute } from "./currentRoute";
@@ -10,13 +10,12 @@ import { UserDetails } from "../permissions/userDetails";
 import { UnauthorizedError } from "../error/unauthorizedError";
 import { PermissionDeniedError } from "../error/permissionDeniedError";
 import { UnknownEndpointError } from "../error/unknownEndpointError";
-import { ApiError } from '../error/apiError';
-import { RouteRecord } from './routeRecord';
-import { RouterOptions } from './routerOptions';
-import { Pageable } from '../pagination/pageable';
+import { ApiError } from "../error/apiError";
+import { RouteRecord } from "./routeRecord";
+import { RouterOptions } from "./routerOptions";
+import { Pageable } from "../pagination/pageable";
 
 export class TSRouter {
-
     private static _instance: TSRouter = undefined;
 
     private _routes: RouteGroup[] = [];
@@ -29,70 +28,82 @@ export class TSRouter {
         this._expressApp = expressApp;
 
         // Set router options
-        if(routerOptions) {
+        if (routerOptions) {
             this._routerOptions = routerOptions;
         }
 
-        for(let group of this._routes) {
-            for(let route of group.routes) {
-                this._expressApp[route.method.toLowerCase()](route.path, async (request: Request, response: Response) => {
-                    let endpointHandler: Endpoint = new group.handler();
-                    let actionFn = this.resolveActionFunctionName(route.action);
-                    let userDetails: UserDetails = null;
+        for (let group of this._routes) {
+            for (let route of group.routes) {
+                this._expressApp[route.method.toLowerCase()](
+                    route.path,
+                    async (request: Request, response: Response) => {
+                        let endpointHandler: Endpoint = new group.handler();
+                        let actionFn = this.resolveActionFunctionName(route.action);
+                        let userDetails: UserDetails = null;
 
-                    console.log(request.params)
-                    console.log(request.query);
+                        console.log(request.params);
+                        console.log(request.query);
 
-                    // If endpoint requires authentication, authenticate 
-                    // and authorize request or throw error on fail
-                    // Also it is checked if some route parameters contain scopes (e.g.: @me)
-                    // that need access to user's details
-                    if(endpointHandler.isRequiringAuthentication() || endpointHandler.isActionRequiringAuth(route.action) || this.routeParamsNeedAuth(request.params)) {
-                        let userId = this._userDetailsService.resolveUserIdFromRequest(request);
-                        userDetails = this._userDetailsService?.loadUserDetails(userId);
+                        // If endpoint requires authentication, authenticate
+                        // and authorize request or throw error on fail
+                        // Also it is checked if some route parameters contain scopes (e.g.: @me)
+                        // that need access to user's details
+                        if (
+                            endpointHandler.isRequiringAuthentication() ||
+                            endpointHandler.isActionRequiringAuth(route.action) ||
+                            this.routeParamsNeedAuth(request.params)
+                        ) {
+                            let userId = this._userDetailsService.resolveUserIdFromRequest(request);
+                            userDetails = this._userDetailsService?.loadUserDetails(userId);
 
-                        // Check if user was authenticated
-                        if(!userDetails.isAuthenticated) {
-                            throw userDetails.authenticationError || new UnauthorizedError();
+                            // Check if user was authenticated
+                            if (!userDetails.isAuthenticated) {
+                                throw userDetails.authenticationError || new UnauthorizedError();
+                            }
+
+                            // Check permissions
+                            if (
+                                !userDetails.hasPermission(endpointHandler.getPermissionForAction(route.action).value)
+                            ) {
+                                throw new PermissionDeniedError();
+                            }
                         }
 
-                        // Check permissions
-                        if(!userDetails.hasPermission(endpointHandler.getPermissionForAction(route.action).value)) {
-                            throw new PermissionDeniedError();
+                        // Build current route object
+                        // Should include request, response, userDetails, route info, parsed params and query args, (optional: Pageable object)
+                        let currentRoute: CurrentRoute = {
+                            ...route,
+                            request,
+                            response,
+                            userDetails,
+                            params: this.translateScopes(request.params, userDetails) || {},
+                            query: request.query || {},
+                            body: request.body || {},
+                            pageable: this.resolvePageableForRoute(route, request.query),
+                        };
+
+                        // Execute action on endpoint with current route as parameter
+                        if (!endpointHandler[actionFn]) {
+                            throw new UnknownEndpointError();
                         }
-                    }
 
-                    // Build current route object
-                    // Should include request, response, userDetails, route info, parsed params and query args, (optional: Pageable object)
-                    let currentRoute: CurrentRoute = {
-                        ...route,
-                        request,
-                        response,
-                        userDetails,
-                        params: this.translateScopes(request.params, userDetails) || {},
-                        query: request.query || {},
-                        body: request.body || {},
-                        pageable: this.resolvePageableForRoute(route, request.query)
-                    }
+                        Promise.resolve(endpointHandler[actionFn](currentRoute))
+                            .then((data: any) => {
+                                // Get returned object from action and create json response from it
 
-                    // Execute action on endpoint with current route as parameter
-                    if(!endpointHandler[actionFn]) {
-                        throw new UnknownEndpointError();
-                    }
+                                let status: number = !data ? 404 : 200;
+                                let json: string = JSON.stringify(data);
 
-                    Promise.resolve(endpointHandler[actionFn](currentRoute)).then((data: any) => {
-                        // Get returned object from action and create json response from it
-
-                        let status: number = !data ? 404 : 200;
-                        let json: string = JSON.stringify(data);
-
-                        response.status(status).json(json);
-                    }).catch((error: ApiError) => {
-                        throw error;
-                    }).finally(() => {
-                        response.end();
-                    });
-                })
+                                response.status(status).json(json);
+                            })
+                            .catch((error: ApiError) => {
+                                throw error;
+                            })
+                            .finally(() => {
+                                response.end();
+                            });
+                    },
+                );
             }
         }
     }
@@ -103,7 +114,7 @@ export class TSRouter {
      * @returns Function name as string
      */
     private resolveActionFunctionName(action: string): string {
-        return 'action'+action.charAt(0).toUpperCase() + action.slice(1);
+        return "action" + action.charAt(0).toUpperCase() + action.slice(1);
     }
 
     /**
@@ -111,11 +122,11 @@ export class TSRouter {
      * @param action Action string
      * @returns Function name as string
      */
-     private resolvePageableForRoute(route: RouteRecord, query: any): Pageable {
+    private resolvePageableForRoute(route: RouteRecord, query: any): Pageable {
         let pageSize;
         let pageNr;
 
-        if(route.forcePagination) {
+        if (route.forcePagination) {
             pageSize = this._routerOptions.pageDefaults.size;
             pageNr = this._routerOptions.pageDefaults.page;
         }
@@ -123,7 +134,7 @@ export class TSRouter {
         pageSize = query.find((queryParam) => queryParam === "size");
         pageNr = query.find((queryParam) => queryParam === "page");
 
-        if(!pageSize || !pageNr) {
+        if (!pageSize || !pageNr) {
             return null;
         }
 
@@ -148,12 +159,12 @@ export class TSRouter {
      * @returns True or False
      */
     private routeParamsNeedAuth(params: any): boolean {
-        let requiresAuth = false
+        let requiresAuth = false;
 
-        for(let param in params) {
-            if(params[param] == '@me') {
-                requiresAuth = true
-                break
+        for (let param in params) {
+            if (params[param] == "@me") {
+                requiresAuth = true;
+                break;
             }
         }
 
@@ -173,7 +184,11 @@ export class TSRouter {
      * @param routes List of routes
      * @returns TSRouter instance
      */
-    public static createInstance(expressApp: Express.Application, routes: RouteGroup[], routerOptions?: RouterOptions): TSRouter {
+    public static createInstance(
+        expressApp: Express.Application,
+        routes: RouteGroup[],
+        routerOptions?: RouterOptions,
+    ): TSRouter {
         this._instance = new TSRouter(expressApp, routes, routerOptions);
         return this._instance;
     }
@@ -185,5 +200,4 @@ export class TSRouter {
     public static getInstance(): TSRouter {
         return this._instance;
     }
-
 }
