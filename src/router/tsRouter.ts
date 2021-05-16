@@ -173,8 +173,8 @@ export class TSRouter {
      * @param routes List of routes
      * @returns TSRouter instance
      */
-    public static createInstance(expressApp: Express.Application, routes: RouteGroup[]): TSRouter {
-        this._instance = new TSRouter(expressApp, routes);
+    public static createInstance(expressApp: Express.Application, routes: RouteGroup[], routerOptions?: RouterOptions): TSRouter {
+        this._instance = new TSRouter(expressApp, routes, routerOptions);
         return this._instance;
     }
 
