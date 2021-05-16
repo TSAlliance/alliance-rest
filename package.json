@@ -1,14 +1,21 @@
 {
-  "name": "tsrest-lib",
-  "version": "1.0.0",
+  "name": "alliance-rest",
+  "version": "1.0.1-alpha",
   "description": "Simple Javascript library for making API development easier and more maintainable",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+  "author": "zettee <cedric.zitzmann@gmail.com>",
+  "homepage": "https://github.com/TSAlliance/alliance-rest#readme",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TSAlliance/alliance-rest.git"
+  },
   "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.11",
+    "@types/node": "^15.3.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   }
