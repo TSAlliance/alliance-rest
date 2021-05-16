@@ -63,7 +63,10 @@ export class TSRouter {
 
                             // Check permissions
                             if (
-                                !userDetails.hasPermission(endpointHandler.getPermissionForAction(route.action).value)
+                                !userDetails.hasPermission(
+                                    endpointHandler.getPermissionForAction(route.action).value,
+                                ) &&
+                                !this.isOwnResource(request.params)
                             ) {
                                 throw new PermissionDeniedError();
                             }
@@ -142,13 +145,23 @@ export class TSRouter {
     }
 
     /**
+     * Check if the requested resource is owned by the user. This is determined wether the params list contains an @me scope or not
+     * @param params Parameters of the route
+     * @returns {boolean} True or False
+     */
+    private isOwnResource(params: any): boolean {
+        let param = params.find((param) => params[param] === "@me");
+        return !!param;
+    }
+
+    /**
      * Translate scopes in request parameters to actual values
      * @param route Route for which the translation should be processed
      * @returns {Router.Route} Route containing translated parameters
      */
     private translateScopes(params: any, userDetails: UserDetails): any[] {
         let param = params.find((param) => params[param] === "@me");
-        params[param] = userDetails.id;
+        params[param] = userDetails.uuid;
 
         return params;
     }
