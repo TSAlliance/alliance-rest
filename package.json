@@ -7,8 +7,9 @@
   "homepage": "https://github.com/TSAlliance/alliance-rest#readme",
   "license": "MIT",
   "scripts": {
+    "publish": "npm run build && npm publish",
     "build": "npm run format && tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\""
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "repository": {
     "type": "git",
@@ -23,5 +24,6 @@
     "prettier": "^2.3.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
-  }
+  },
+  "files": ["lib/**/*"]
 }
