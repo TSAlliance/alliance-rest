@@ -53,8 +53,16 @@ export class TSRouter {
                             endpointHandler.isActionRequiringAuth(route.action) ||
                             this.routeParamsNeedAuth(request.params)
                         ) {
-                            let userId = this._userDetailsService.resolveUserIdFromRequest(request);
-                            userDetails = this._userDetailsService?.loadUserDetails(userId);
+                            let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
+
+                            if (!resolvedResult) {
+                                throw new UnauthorizedError();
+                            }
+
+                            userDetails = await this._userDetailsService?.loadUserDetails(
+                                resolvedResult[0],
+                                resolvedResult[1],
+                            );
 
                             // Check if user was authenticated
                             if (!userDetails.isAuthenticated) {

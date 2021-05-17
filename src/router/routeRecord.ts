@@ -7,5 +7,5 @@ export interface RouteRecord {
     action: string;
     method: RouteMethod;
     meta?: HashMap<any>;
-    forcePagination: boolean;
+    forcePagination?: boolean;
 }

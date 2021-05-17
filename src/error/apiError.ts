@@ -4,11 +4,11 @@ export abstract class ApiError extends Error {
     private readonly _response: HashMap<any> = {};
     private readonly _httpStatusCode: number = 400;
 
-    constructor(message: string, httpStatusCode: number) {
+    constructor(message: string, httpStatusCode: number, errorCode?: string) {
         super(message);
 
         this._response["timestamp"] = new Date();
-        this._response["error"] = this.getErrorCode();
+        this._response["error"] = errorCode || "UNKNOWN_ERROR";
         this._response["message"] = this.message;
 
         this._httpStatusCode = httpStatusCode;
@@ -27,8 +27,6 @@ export abstract class ApiError extends Error {
     protected setDetailsMap(details: HashMap<any>): void {
         this._response["details"] = details;
     }
-
-    protected abstract getErrorCode(): string;
 
     public get response(): HashMap<any> {
         return this._response;
