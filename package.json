@@ -1,6 +1,6 @@
 {
   "name": "alliance-rest",
-  "version": "1.0.1-alpha16",
+  "version": "1.0.1-alpha18",
   "description": "Simple Javascript library for making API development easier and more maintainable",
   "author": "zettee <cedric.zitzmann@gmail.com>",
   "homepage": "https://github.com/TSAlliance/alliance-rest#readme",
@@ -15,7 +15,9 @@
     "url": "https://github.com/TSAlliance/alliance-rest.git"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "sequelize": "^6.6.2",
+    "sequelize-typescript": "^2.1.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
