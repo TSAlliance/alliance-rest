@@ -2,7 +2,6 @@ import Express, { Request, Response } from "express";
 
 import { RouteGroup } from "./routeGroup";
 import { CurrentRoute } from "./currentRoute";
-import { Endpoint } from "../endpoint/endpoint";
 
 import { UserDetailsService } from "../permissions/userDetailsService";
 import { UserDetails } from "../permissions/userDetails";
@@ -14,6 +13,7 @@ import { ApiError } from "../error/apiError";
 import { RouteRecord } from "./routeRecord";
 import { RouterOptions } from "./routerOptions";
 import { Pageable } from "../pagination/pageable";
+import { Controller } from "../controller/controller";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -37,7 +37,7 @@ export class TSRouter {
                 this._expressApp[route.method.toLowerCase()](
                     route.path,
                     async (request: Request, response: Response) => {
-                        let endpointHandler: Endpoint = new group.handler();
+                        let controller: Controller = new group.handler();
                         let actionFn = this.resolveActionFunctionName(route.action);
                         let userDetails: UserDetails = null;
 
@@ -49,8 +49,8 @@ export class TSRouter {
                         // Also it is checked if some route parameters contain scopes (e.g.: @me)
                         // that need access to user's details
                         if (
-                            endpointHandler.isRequiringAuthentication() ||
-                            endpointHandler.isActionRequiringAuth(route.action) ||
+                            controller.isRequiringAuthentication() ||
+                            controller.isActionRequiringAuth(route.action) ||
                             this.routeParamsNeedAuth(request.params)
                         ) {
                             let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
@@ -71,9 +71,7 @@ export class TSRouter {
 
                             // Check permissions
                             if (
-                                !userDetails.hasPermission(
-                                    endpointHandler.getPermissionForAction(route.action).value,
-                                ) &&
+                                !userDetails.hasPermission(controller.getPermissionForAction(route.action).value) &&
                                 !this.isOwnResource(request.params)
                             ) {
                                 throw new PermissionDeniedError();
@@ -94,11 +92,11 @@ export class TSRouter {
                         };
 
                         // Execute action on endpoint with current route as parameter
-                        if (!endpointHandler[actionFn]) {
+                        if (!controller[actionFn]) {
                             throw new UnknownEndpointError();
                         }
 
-                        Promise.resolve(endpointHandler[actionFn](currentRoute))
+                        Promise.resolve(controller[actionFn](currentRoute))
                             .then((data: any) => {
                                 // Get returned object from action and create json response from it
 

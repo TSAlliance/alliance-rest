@@ -1,7 +1,7 @@
 import { EndpointFlag } from "../flags/endpointFlag";
 import { EndpointPermission } from "../permissions/endpointPermission";
 
-export abstract class Endpoint {
+export abstract class Controller {
     private _flags: EndpointFlag[] = [];
     private _permissions: EndpointPermission[];
 
