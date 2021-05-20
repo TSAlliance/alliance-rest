@@ -70,7 +70,7 @@ export class TSRouter {
 
                             // Check permissions
                             if (
-                                !userDetails.hasPermission(controller.getPermissionForAction(route.action).value) &&
+                                !userDetails.hasPermission(controller.getPermissionForAction(route.action)?.value) &&
                                 !this.isOwnResource(request.params)
                             ) {
                                 throw new PermissionDeniedError();
@@ -100,13 +100,10 @@ export class TSRouter {
                                 // Get returned object from action and create json response from it
 
                                 let status: number = !data ? 404 : 200;
-                                let json: string = JSON.stringify(data);
-
-                                response.status(status).json(json);
+                                response.status(status).json(data);
                             })
                             .catch((error) => {
                                 if (!this._errorHandler) throw error;
-
                                 this._errorHandler.handleError(error, request, response);
                             });
                     },

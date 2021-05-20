@@ -24,13 +24,7 @@ export abstract class Controller {
      * @returns True or False
      */
     public isActionRequiringAuth(action: string): boolean {
-        for (let permission of this._permissions) {
-            if (permission.action === action) {
-                return true;
-            }
-        }
-
-        return false;
+        return !!this.getPermissionForAction(action);
     }
 
     /**
@@ -47,8 +41,12 @@ export abstract class Controller {
      * @returns EndpointPermission
      */
     public getPermissionForAction(action: string): EndpointPermission {
-        return this._permissions.find((permission) => {
-            permission.action.toLowerCase() === action.toLowerCase();
+        let permission = this._permissions.find((endpointPermission) => {
+            if (endpointPermission.action.toLowerCase() == action.toLowerCase()) {
+                return endpointPermission;
+            }
         });
+
+        return permission;
     }
 }

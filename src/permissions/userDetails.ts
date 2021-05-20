@@ -6,6 +6,6 @@ export interface UserDetails {
     authenticationError?: ApiError;
     roleId: string;
 
-    hasPermission(permission: string): boolean;
+    hasPermission(permission?: string): boolean;
     getHierarchy(): number;
 }
