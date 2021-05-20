@@ -14,6 +14,7 @@ import { RouteRecord } from "./routeRecord";
 import { RouterOptions } from "./routerOptions";
 import { Pageable } from "../pagination/pageable";
 import { Controller } from "../controller/controller";
+import { ErrorHandler } from "../error/errorHandler";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -22,6 +23,7 @@ export class TSRouter {
     private _expressApp: Express.Application;
     private _userDetailsService?: UserDetailsService;
     private _routerOptions: RouterOptions = new RouterOptions();
+    private _errorHandler?: ErrorHandler;
 
     constructor(expressApp: Express.Application, routes: RouteGroup[], routerOptions?: RouterOptions) {
         this._routes = routes;
@@ -40,9 +42,6 @@ export class TSRouter {
                         let controller: Controller = new group.handler();
                         let actionFn = this.resolveActionFunctionName(route.action);
                         let userDetails: UserDetails = null;
-
-                        console.log(request.params);
-                        console.log(request.query);
 
                         // If endpoint requires authentication, authenticate
                         // and authorize request or throw error on fail
@@ -96,7 +95,7 @@ export class TSRouter {
                             throw new UnknownEndpointError();
                         }
 
-                        Promise.resolve(controller[actionFn](currentRoute))
+                        controller[actionFn](currentRoute)
                             .then((data: any) => {
                                 // Get returned object from action and create json response from it
 
@@ -105,11 +104,10 @@ export class TSRouter {
 
                                 response.status(status).json(json);
                             })
-                            .catch((error: ApiError) => {
-                                throw error;
-                            })
-                            .finally(() => {
-                                response.end();
+                            .catch((error) => {
+                                if (!this._errorHandler) throw error;
+
+                                this._errorHandler.handleError(error, request, response);
                             });
                     },
                 );
@@ -132,19 +130,18 @@ export class TSRouter {
      * @returns Function name as string
      */
     private resolvePageableForRoute(route: RouteRecord, query: any): Pageable {
-        let pageSize;
-        let pageNr;
+        if (!query) query = {};
 
-        if (route.forcePagination) {
-            pageSize = this._routerOptions.pageDefaults.size;
-            pageNr = this._routerOptions.pageDefaults.page;
-        }
-
-        pageSize = query.find((queryParam) => queryParam === "size");
-        pageNr = query.find((queryParam) => queryParam === "page");
+        let pageSize = query["size"];
+        let pageNr = query["page"];
 
         if (!pageSize || !pageNr) {
-            return null;
+            if (route.forcePagination) {
+                pageSize = this._routerOptions.pageDefaults.size;
+                pageNr = this._routerOptions.pageDefaults.page;
+            } else {
+                return null;
+            }
         }
 
         return Pageable.of(pageSize, pageNr);
@@ -156,8 +153,7 @@ export class TSRouter {
      * @returns {boolean} True or False
      */
     private isOwnResource(params: any): boolean {
-        let param = params.find((param) => params[param] === "@me");
-        return !!param;
+        return Object.values(params).includes("@me");
     }
 
     /**
@@ -165,9 +161,15 @@ export class TSRouter {
      * @param route Route for which the translation should be processed
      * @returns {Router.Route} Route containing translated parameters
      */
-    private translateScopes(params: any, userDetails: UserDetails): any[] {
-        let param = params.find((param) => params[param] === "@me");
-        params[param] = userDetails.uuid;
+    private translateScopes(params: any, userDetails: UserDetails): any {
+        if (!params) params = {};
+
+        // Translate @me to uuid
+        let paramKey = Object.keys(params).find((key) => params[key] == "@me");
+
+        if (paramKey) {
+            params[paramKey] = userDetails.uuid;
+        }
 
         return params;
     }
@@ -196,6 +198,14 @@ export class TSRouter {
      */
     public setUserDetailsService(service: UserDetailsService): void {
         this._userDetailsService = service;
+    }
+
+    /**
+     * Set error handler
+     * @param errorHandler Error Handler Implementation
+     */
+    public setErrorHandler(errorHandler: ErrorHandler): void {
+        this._errorHandler = errorHandler;
     }
 
     /**

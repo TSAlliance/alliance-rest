@@ -1,38 +1,30 @@
 import { HashMap } from "../util/hashMap";
 
 export abstract class ApiError extends Error {
-    private readonly _response: HashMap<any> = {};
-    private readonly _httpStatusCode: number = 400;
+    public readonly response: HashMap<any> = {};
+    public readonly httpStatusCode: number = 400;
 
     constructor(message: string, httpStatusCode: number, errorCode?: string) {
         super(message);
 
-        this._response["timestamp"] = new Date();
-        this._response["error"] = errorCode || "UNKNOWN_ERROR";
-        this._response["message"] = this.message;
+        this.response["timestamp"] = new Date();
+        this.response["error"] = errorCode || "UNKNOWN_ERROR";
+        this.response["message"] = this.message;
 
-        this._httpStatusCode = httpStatusCode;
+        this.httpStatusCode = httpStatusCode;
     }
 
     protected putDetail(key: string, value: any): void {
-        let details: HashMap<any> = this._response["details"] || {};
+        let details: HashMap<any> = this.response["details"] || {};
         details[key] = value;
 
-        this._response["details"] = details;
+        this.response["details"] = details;
     }
 
     protected setDetailsList(details: Array<any>): void {
-        this._response["details"] = details;
+        this.response["details"] = details;
     }
     protected setDetailsMap(details: HashMap<any>): void {
-        this._response["details"] = details;
-    }
-
-    public get response(): HashMap<any> {
-        return this._response;
-    }
-
-    public get httpStatus(): number {
-        return this._httpStatusCode;
+        this.response["details"] = details;
     }
 }
