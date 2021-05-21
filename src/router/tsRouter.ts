@@ -15,6 +15,7 @@ import { RouterOptions } from "./routerOptions";
 import { Pageable } from "../pagination/pageable";
 import { Controller } from "../controller/controller";
 import { ErrorHandler } from "../error/errorHandler";
+import { BadRequestError } from "../error/badRequestError";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -98,9 +99,14 @@ export class TSRouter {
                         controller[actionFn](currentRoute)
                             .then((data: any) => {
                                 // Get returned object from action and create json response from it
+                                let status: number = 200;
 
-                                let status: number = !data ? 404 : 200;
-                                response.status(status).json(data);
+                                if (data == null) {
+                                    status = 404;
+                                    response.status(status).end();
+                                } else {
+                                    response.status(status).json(data).end();
+                                }
                             })
                             .catch((error) => {
                                 if (!this._errorHandler) throw error;
@@ -129,16 +135,14 @@ export class TSRouter {
     private resolvePageableForRoute(route: RouteRecord, query: any): Pageable {
         if (!query) query = {};
 
-        let pageSize = query["size"];
-        let pageNr = query["page"];
+        let pageSize = Number(query["size"]);
+        let pageNr = Number(query["page"]);
 
-        if (!pageSize || !pageNr) {
-            if (route.forcePagination) {
-                pageSize = this._routerOptions.pageDefaults.size;
-                pageNr = this._routerOptions.pageDefaults.page;
-            } else {
-                return null;
-            }
+        if (route.forcePagination) {
+            if (isNaN(pageSize)) pageSize = this._routerOptions.pageDefaults.size;
+            if (isNaN(pageNr)) pageNr = this._routerOptions.pageDefaults.page;
+        } else {
+            return null;
         }
 
         return Pageable.of(pageSize, pageNr);

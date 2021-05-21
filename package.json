@@ -1,6 +1,6 @@
 {
   "name": "alliance-rest",
-  "version": "1.0.1-alpha18",
+  "version": "1.0.1-alpha51",
   "description": "Simple Javascript library for making API development easier and more maintainable",
   "author": "zettee <cedric.zitzmann@gmail.com>",
   "homepage": "https://github.com/TSAlliance/alliance-rest#readme",
