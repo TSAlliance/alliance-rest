@@ -9,13 +9,13 @@ import { UserDetails } from "../permissions/userDetails";
 import { UnauthorizedError } from "../error/unauthorizedError";
 import { PermissionDeniedError } from "../error/permissionDeniedError";
 import { UnknownEndpointError } from "../error/unknownEndpointError";
-import { ApiError } from "../error/apiError";
 import { RouteRecord } from "./routeRecord";
 import { RouterOptions } from "./routerOptions";
 import { Pageable } from "../pagination/pageable";
 import { Controller } from "../controller/controller";
 import { ErrorHandler } from "../error/errorHandler";
-import { BadRequestError } from "../error/badRequestError";
+
+import { Response as ApiResponse } from "../response";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -99,13 +99,16 @@ export class TSRouter {
                         controller[actionFn](currentRoute)
                             .then((data: any) => {
                                 // Get returned object from action and create json response from it
-                                let status: number = 200;
+                                let status: number = data?.httpStatusCode || 200;
 
                                 if (data == null) {
                                     status = 404;
                                     response.status(status).end();
                                 } else {
-                                    response.status(status).json(data).end();
+                                    response
+                                        .status(status)
+                                        .json(data.response || data)
+                                        .end();
                                 }
                             })
                             .catch((error) => {

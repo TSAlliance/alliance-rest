@@ -1,8 +1,9 @@
 import { HashMap } from "../util/hashMap";
+import { Response } from "../response";
 
-export abstract class ApiError extends Error {
-    public readonly response: HashMap<any> = {};
-    public readonly httpStatusCode: number = 400;
+export abstract class ApiError extends Error implements Response {
+    public response: HashMap<any> = {};
+    public httpStatusCode: number = 400;
 
     constructor(message: string, httpStatusCode: number, errorCode?: string) {
         super(message);
