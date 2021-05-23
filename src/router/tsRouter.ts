@@ -16,6 +16,7 @@ import { Controller } from "../controller/controller";
 import { ErrorHandler } from "../error/errorHandler";
 
 import { Response as ApiResponse } from "../response";
+import { ApiError } from "../error/apiError";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -40,81 +41,84 @@ export class TSRouter {
                 this._expressApp[route.method.toLowerCase()](
                     route.path,
                     async (request: Request, response: Response) => {
-                        let controller: Controller = new group.handler();
-                        let actionFn = this.resolveActionFunctionName(route.action);
-                        let userDetails: UserDetails = null;
+                        let execute = async (request: Request, response: Response) => {
+                            let controller: Controller = new group.handler();
+                            let actionFn = this.resolveActionFunctionName(route.action);
+                            let userDetails: UserDetails = null;
 
-                        // If endpoint requires authentication, authenticate
-                        // and authorize request or throw error on fail
-                        // Also it is checked if some route parameters contain scopes (e.g.: @me)
-                        // that need access to user's details
-                        if (
-                            controller.isRequiringAuthentication() ||
-                            controller.isActionRequiringAuth(route.action) ||
-                            this.routeParamsNeedAuth(request.params)
-                        ) {
-                            let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
-
-                            if (!resolvedResult) {
-                                throw new UnauthorizedError();
-                            }
-
-                            userDetails = await this._userDetailsService?.loadUserDetails(
-                                resolvedResult[0],
-                                resolvedResult[1],
-                            );
-
-                            // Check if user was authenticated
-                            if (!userDetails.isAuthenticated) {
-                                throw userDetails.authenticationError || new UnauthorizedError();
-                            }
-
-                            // Check permissions
+                            // If endpoint requires authentication, authenticate
+                            // and authorize request or throw error on fail
+                            // Also it is checked if some route parameters contain scopes (e.g.: @me)
+                            // that need access to user's details
                             if (
-                                !userDetails.hasPermission(controller.getPermissionForAction(route.action)?.value) &&
-                                !this.isOwnResource(request.params)
+                                controller.isRequiringAuthentication() ||
+                                controller.isActionRequiringAuth(route.action) ||
+                                this.routeParamsNeedAuth(request.params)
                             ) {
-                                throw new PermissionDeniedError();
-                            }
-                        }
+                                let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
 
-                        // Build current route object
-                        // Should include request, response, userDetails, route info, parsed params and query args, (optional: Pageable object)
-                        let currentRoute: CurrentRoute = {
-                            ...route,
-                            request,
-                            response,
-                            userDetails,
-                            params: this.translateScopes(request.params, userDetails) || {},
-                            query: request.query || {},
-                            body: request.body || {},
-                            pageable: this.resolvePageableForRoute(route, request.query),
+                                if (!resolvedResult) {
+                                    throw new UnauthorizedError();
+                                }
+
+                                userDetails = await this._userDetailsService?.loadUserDetails(
+                                    resolvedResult[0],
+                                    resolvedResult[1],
+                                );
+
+                                // Check if user was authenticated
+                                if (!userDetails.isAuthenticated) {
+                                    throw userDetails.authenticationError || new UnauthorizedError();
+                                }
+
+                                // Check permissions
+                                if (
+                                    !userDetails.hasPermission(
+                                        controller.getPermissionForAction(route.action)?.value,
+                                    ) &&
+                                    !this.isOwnResource(request.params)
+                                ) {
+                                    throw new PermissionDeniedError();
+                                }
+                            }
+
+                            // Build current route object
+                            // Should include request, response, userDetails, route info, parsed params and query args, (optional: Pageable object)
+                            let currentRoute: CurrentRoute = {
+                                ...route,
+                                request,
+                                response,
+                                userDetails,
+                                params: this.translateScopes(request.params, userDetails) || {},
+                                query: request.query || {},
+                                body: request.body || {},
+                                pageable: this.resolvePageableForRoute(route, request.query),
+                            };
+
+                            // Execute action on endpoint with current route as parameter
+                            if (!controller[actionFn]) {
+                                throw new UnknownEndpointError();
+                            }
+
+                            controller[actionFn](currentRoute)
+                                .then((data: any) => {
+                                    // Get returned object from action and create json response from it
+                                    let status: number = data?.httpStatusCode || 200;
+
+                                    if (data == null) {
+                                        status = 404;
+                                        response.status(status).end();
+                                    } else {
+                                        response
+                                            .status(status)
+                                            .json(data.response || data)
+                                            .end();
+                                    }
+                                })
+                                .catch((error: ApiError) => this.throwError(error, request, response));
                         };
 
-                        // Execute action on endpoint with current route as parameter
-                        if (!controller[actionFn]) {
-                            throw new UnknownEndpointError();
-                        }
-
-                        controller[actionFn](currentRoute)
-                            .then((data: any) => {
-                                // Get returned object from action and create json response from it
-                                let status: number = data?.httpStatusCode || 200;
-
-                                if (data == null) {
-                                    status = 404;
-                                    response.status(status).end();
-                                } else {
-                                    response
-                                        .status(status)
-                                        .json(data.response || data)
-                                        .end();
-                                }
-                            })
-                            .catch((error) => {
-                                if (!this._errorHandler) throw error;
-                                this._errorHandler.handleError(error, request, response);
-                            });
+                        execute(request, response).catch((error) => this.throwError(error, request, response));
                     },
                 );
             }
@@ -128,6 +132,17 @@ export class TSRouter {
      */
     private resolveActionFunctionName(action: string): string {
         return "action" + action.charAt(0).toUpperCase() + action.slice(1);
+    }
+
+    /**
+     * Throw errors of an error handler is set
+     * @param error Error to throw
+     * @param request Express' Request object
+     * @param response Express' Response
+     */
+    private throwError(error: ApiError, request: Request, response: Response) {
+        if (!this._errorHandler) throw error;
+        this._errorHandler.handleError(error, request, response);
     }
 
     /**

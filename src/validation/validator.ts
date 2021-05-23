@@ -12,23 +12,33 @@ export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
 
     public text(fieldname: string, subject: string): TextRule {
-        return new TextRule(subject, fieldname);
+        let rule = new TextRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
     }
 
     public email(fieldname: string, subject: string): EmailRule {
-        return new EmailRule(subject, fieldname);
+        let rule = new EmailRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
     }
 
     public password(fieldname: string, subject: string): PasswordRule {
-        return new PasswordRule(subject, fieldname);
+        let rule = new PasswordRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
     }
 
     public url(fieldname: string, subject: string): UrlRule {
-        return new UrlRule(subject, fieldname);
+        let rule = new UrlRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
     }
 
     public number(fieldname: string, subject: number): NumberRule {
-        return new NumberRule(subject, fieldname);
+        let rule = new NumberRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
     }
 
     public throwErrors(): void {
