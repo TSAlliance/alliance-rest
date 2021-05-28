@@ -17,6 +17,7 @@ import { ErrorHandler } from "../error/errorHandler";
 
 import { Response as ApiResponse } from "../response";
 import { ApiError } from "../error/apiError";
+import { NotFoundError } from "../error/notFoundError";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -107,7 +108,7 @@ export class TSRouter {
 
                                     if (data == null) {
                                         status = 404;
-                                        response.status(status).end();
+                                        throw new NotFoundError();
                                     } else {
                                         response
                                             .status(status)
