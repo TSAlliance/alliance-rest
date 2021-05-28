@@ -69,7 +69,7 @@ export abstract class ValidationRule<T> {
     /**
      * Execute test
      */
-    protected abstract test(): void;
+    public abstract test(): void;
 
     /**
      * Register a failed test in the registry
@@ -77,7 +77,7 @@ export abstract class ValidationRule<T> {
      * @param foundValue Value that is present
      * @param expectedValue Value that was expected
      */
-    protected putFailedTest(testName: string, foundValue: any, expectedValue: any): void {
+    public putFailedTest(testName: string, foundValue: any, expectedValue: any): void {
         this.checkForAndDeleteExistingTest(testName);
 
         this._failedTests.push({
@@ -122,7 +122,7 @@ export abstract class ValidationRule<T> {
      * Check if a value exists and therefor if validation is required or not
      * @return True or False
      */
-    protected needsValidation(): boolean {
+    private needsValidation(): boolean {
         let needsValidation: boolean;
 
         if (this._required) {

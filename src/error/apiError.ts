@@ -15,17 +15,17 @@ export abstract class ApiError extends Error implements Response {
         this.httpStatusCode = httpStatusCode;
     }
 
-    protected putDetail(key: string, value: any): void {
+    public putDetail(key: string, value: any): void {
         let details: HashMap<any> = this.response["details"] || {};
         details[key] = value;
 
         this.response["details"] = details;
     }
 
-    protected setDetailsList(details: Array<any>): void {
+    public setDetailsList(details: Array<any>): void {
         this.response["details"] = details;
     }
-    protected setDetailsMap(details: HashMap<any>): void {
+    public setDetailsMap(details: HashMap<any>): void {
         this.response["details"] = details;
     }
 }
