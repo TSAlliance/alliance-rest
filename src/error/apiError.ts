@@ -11,6 +11,7 @@ export abstract class ApiError extends Error implements Response {
         this.response["timestamp"] = new Date();
         this.response["error"] = errorCode || "UNKNOWN_ERROR";
         this.response["message"] = this.message;
+        this.response["statusCode"] = httpStatusCode;
 
         this.httpStatusCode = httpStatusCode;
     }
