@@ -1,7 +1,25 @@
-import { UserDetails } from "./userDetails";
+import { ResolvedUserId, UserDetails } from "./userDetails";
 import { Request } from "express";
 
 export abstract class UserDetailsService {
-    public abstract loadUserDetails(userId: string, token?: object): Promise<UserDetails>;
-    public abstract resolveUserIdFromRequest(request: Request): [string, object];
+    /**
+     * Load user details based on the id. The additional token data is optional
+     * @param resolvedUserId User's resolved id data
+     * @returns Promise of type UserDetails
+     */
+    public abstract loadUserDetails(resolvedUserId: ResolvedUserId): Promise<UserDetails>;
+
+    /**
+     * Read users id from authorization info provided by the requester
+     * @param request Express' request instance
+     * @returns Instance of ResolvedUserId
+     */
+    public abstract resolveUserIdFromRequest(request: Request): ResolvedUserId;
+
+    /**
+     * Check if some kind of authorization info is provided by the requester.
+     * @param request Express' request instance
+     * @returns True or False
+     */
+    public abstract isAuthorizationPresent(request: Request): boolean;
 }

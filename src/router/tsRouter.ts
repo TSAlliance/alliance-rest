@@ -15,7 +15,6 @@ import { Pageable } from "../pagination/pageable";
 import { Controller } from "../controller/controller";
 import { ErrorHandler } from "../error/errorHandler";
 
-import { Response as ApiResponse } from "../response";
 import { ApiError } from "../error/apiError";
 import { NotFoundError } from "../error/notFoundError";
 
@@ -54,7 +53,8 @@ export class TSRouter {
                             if (
                                 controller.isRequiringAuthentication() ||
                                 controller.isActionRequiringAuth(route.action) ||
-                                this.routeParamsNeedAuth(request.params)
+                                this.routeParamsNeedAuth(request.params) ||
+                                this._userDetailsService.isAuthorizationPresent(request)
                             ) {
                                 let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
 
@@ -62,10 +62,7 @@ export class TSRouter {
                                     throw new UnauthorizedError();
                                 }
 
-                                userDetails = await this._userDetailsService?.loadUserDetails(
-                                    resolvedResult[0],
-                                    resolvedResult[1],
-                                );
+                                userDetails = await this._userDetailsService?.loadUserDetails(resolvedResult);
 
                                 // Check if user was authenticated
                                 if (!userDetails.isAuthenticated) {
