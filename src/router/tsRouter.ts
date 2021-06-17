@@ -46,6 +46,14 @@ export class TSRouter {
                             let actionFn = this.resolveActionFunctionName(route.action);
                             let userDetails: UserDetails = null;
 
+                            // Get a constant value to check if auth is optional. This is detected by using the payloads
+                            // provided by request and the evaluation of the requested endpoint
+                            const isAuthOptional =
+                                this._userDetailsService.isAuthorizationPresent(request) &&
+                                !controller.isRequiringAuthentication() &&
+                                !controller.isActionRequiringAuth(route.action) &&
+                                !this.routeParamsNeedAuth(request.params);
+
                             // If endpoint requires authentication, authenticate
                             // and authorize request or throw error on fail
                             // Also it is checked if some route parameters contain scopes (e.g.: @me)
@@ -57,26 +65,28 @@ export class TSRouter {
                                 this._userDetailsService.isAuthorizationPresent(request)
                             ) {
                                 let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
-
                                 if (!resolvedResult) {
-                                    throw new UnauthorizedError();
+                                    if (!isAuthOptional) throw new UnauthorizedError();
+                                } else {
+                                    userDetails = await this._userDetailsService?.loadUserDetails(resolvedResult);
                                 }
 
-                                userDetails = await this._userDetailsService?.loadUserDetails(resolvedResult);
+                                // Only throw errors and therefor deny request if the authentication was required.
+                                if (!isAuthOptional) {
+                                    // Check if user was authenticated
+                                    if (!userDetails.isAuthenticated) {
+                                        throw userDetails.authenticationError || new UnauthorizedError();
+                                    }
 
-                                // Check if user was authenticated
-                                if (!userDetails.isAuthenticated) {
-                                    throw userDetails.authenticationError || new UnauthorizedError();
-                                }
-
-                                // Check permissions
-                                if (
-                                    !userDetails.hasPermission(
-                                        controller.getPermissionForAction(route.action)?.value,
-                                    ) &&
-                                    !this.isOwnResource(request.params)
-                                ) {
-                                    throw new PermissionDeniedError();
+                                    // Check permissions
+                                    if (
+                                        !userDetails.hasPermission(
+                                            controller.getPermissionForAction(route.action)?.value,
+                                        ) &&
+                                        !this.isOwnResource(request.params)
+                                    ) {
+                                        throw new PermissionDeniedError();
+                                    }
                                 }
                             }
 
