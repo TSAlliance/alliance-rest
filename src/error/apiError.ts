@@ -1,5 +1,5 @@
 import { HashMap } from "../util/hashMap";
-import { Response } from "../response";
+import { Response } from "../response/response";
 
 export abstract class ApiError extends Error implements Response {
     public response: HashMap<any> = {};

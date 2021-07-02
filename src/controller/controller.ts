@@ -1,11 +1,9 @@
-import { EndpointFlag } from "../flags/endpointFlag";
-import { EndpointPermission } from "../permissions/endpointPermission";
 
 export abstract class Controller {
-    private _flags: EndpointFlag[] = [];
-    private _permissions: EndpointPermission[];
+    private _flags: ControllerFlag[] = [];
+    private _permissions: ControllerPermission[];
 
-    constructor(flags: EndpointFlag[], permissions: EndpointPermission[]) {
+    constructor(flags: ControllerFlag[], permissions: ControllerPermission[]) {
         this._flags = flags;
         this._permissions = permissions;
     }
@@ -15,7 +13,7 @@ export abstract class Controller {
      * @returns True or False
      */
     public isRequiringAuthentication(): boolean {
-        return this._flags.includes(EndpointFlag.FLAG_AUTHENTICATION_REQUIRED);
+        return this._flags.includes(ControllerFlag.FLAG_AUTHENTICATION_REQUIRED);
     }
 
     /**
@@ -31,7 +29,7 @@ export abstract class Controller {
      * Get a list of permissions for certain actions on an endpoint
      * @returns EndpointPermissions array
      */
-    public getPermissions(): EndpointPermission[] {
+    public getPermissions(): ControllerPermission[] {
         return this._permissions;
     }
 
@@ -40,7 +38,7 @@ export abstract class Controller {
      * @param action Action's name
      * @returns EndpointPermission
      */
-    public getPermissionForAction(action: string): EndpointPermission {
+    public getPermissionForAction(action: string): ControllerPermission {
         let permission = this._permissions.find((endpointPermission) => {
             if (endpointPermission.action.toLowerCase() == action.toLowerCase()) {
                 return endpointPermission;
@@ -50,3 +48,18 @@ export abstract class Controller {
         return permission;
     }
 }
+
+export const enum ControllerFlag {
+    FLAG_AUTHENTICATION_REQUIRED = 1,
+}
+
+export class ControllerPermission {
+    public value: string;
+    public action: string;
+
+    constructor(value: string, action: string) {
+        this.value = value;
+        this.action = action;
+    }
+}
+

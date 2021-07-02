@@ -35,8 +35,8 @@ export interface MailResponse {
     error?: Error;
 }
 
-export class MailSender {
-    private static _instance: MailSender = undefined;
+export class MailUtil {
+    private static _instance: MailUtil = undefined;
     private _transporter: Transporter;
     private _mailSenderOptions: MailSenderOptions;
 
@@ -129,15 +129,15 @@ export class MailSender {
      * @param options MailSMPTOptions
      * @returns MailSender instance
      */
-    public static createInstance(options: MailSenderOptions): MailSender {
-        this._instance = new MailSender(options);
+    public static createInstance(options: MailSenderOptions): MailUtil {
+        this._instance = new MailUtil(options);
         return this._instance;
     }
 
     /**
      * Get instance of MailSender
      */
-    public static getInstance(): MailSender {
+    public static getInstance(): MailUtil {
         return this._instance;
     }
 }

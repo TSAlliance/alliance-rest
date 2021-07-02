@@ -1,4 +1,4 @@
-import { HashMap } from "./util/hashMap";
+import { HashMap } from "../util/hashMap";
 
 export interface Response {
     httpStatusCode: number;
