@@ -1,5 +1,5 @@
+import { HashMap } from "alliance-sdk";
 import { RouteMethod } from "./routeMethod";
-import { HashMap } from "../util/hashMap";
 
 export interface RouteRecord {
     name: string;

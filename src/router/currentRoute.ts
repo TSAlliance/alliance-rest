@@ -1,7 +1,6 @@
 import { RouteRecord } from "./routeRecord";
 import { Request, Response } from "express";
-import { UserDetails } from "../permissions/userDetails";
-import { Pageable } from "../pagination/pageable";
+import { Pageable, UserDetails } from "alliance-sdk";
 
 export interface CurrentRoute extends RouteRecord {
     request: Request;

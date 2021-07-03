@@ -5,8 +5,9 @@ import { PasswordRule } from "./rules/passwordRule";
 import { UrlRule } from "./rules/urlRule";
 import { NumberRule } from "./rules/numberRule";
 
-import { HashMap } from "../util/hashMap";
 import { ValidationException } from "../error/validationError";
+
+import { HashMap } from "alliance-sdk";
 
 export class Validator {
     private _rules: Array<ValidationRule<any>> = [];

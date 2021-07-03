@@ -1,4 +1,3 @@
-
 export abstract class Controller {
     private _flags: ControllerFlag[] = [];
     private _permissions: ControllerPermission[];
@@ -62,4 +61,3 @@ export class ControllerPermission {
         this.action = action;
     }
 }
-

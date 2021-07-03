@@ -1,5 +1,5 @@
+import { HashMap } from "alliance-sdk";
 import { UniqueValidationFunction } from "../functions/uniqueValidationFunction";
-import { HashMap } from "../../util/hashMap";
 
 export abstract class ValidationRule<T> {
     private readonly _subject: T;

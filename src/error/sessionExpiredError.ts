@@ -1,4 +1,4 @@
-import { ApiError } from "./apiError";
+import { ApiError } from "alliance-sdk";
 
 export class SessionExpiredError extends ApiError {
     constructor() {

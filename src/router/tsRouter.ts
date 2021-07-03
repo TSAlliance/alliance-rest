@@ -3,20 +3,16 @@ import Express, { Request, Response } from "express";
 import { RouteGroup } from "./routeGroup";
 import { CurrentRoute } from "./currentRoute";
 
-import { UserDetailsService } from "../permissions/userDetailsService";
-import { UserDetails } from "../permissions/userDetails";
-
 import { UnauthorizedError } from "../error/unauthorizedError";
 import { PermissionDeniedError } from "../error/permissionDeniedError";
 import { UnknownEndpointError } from "../error/unknownEndpointError";
 import { RouteRecord } from "./routeRecord";
 import { RouterOptions } from "./routerOptions";
-import { Pageable } from "../pagination/pageable";
 import { Controller } from "../controller/controller";
 import { ErrorHandler } from "../error/errorHandler";
 
-import { ApiError } from "../error/apiError";
 import { NotFoundError } from "../error/notFoundError";
+import { ApiError, Pageable, UserDetails, UserDetailsService } from "alliance-sdk";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -113,14 +109,18 @@ export class TSRouter {
                                     // Get returned object from action and create json response from it
                                     let status: number = data?.httpStatusCode || 200;
 
-                                    if (data == null) {
-                                        status = 404;
-                                        throw new NotFoundError();
-                                    } else {
-                                        response
-                                            .status(status)
-                                            .json(data.response || data)
-                                            .end();
+                                    try {
+                                        if (data == null) {
+                                            status = 404;
+                                            throw new NotFoundError();
+                                        } else {
+                                            response
+                                                .status(status)
+                                                .json(data.response || data)
+                                                .end();
+                                        }
+                                    } catch (error) {
+                                        this.throwError(error, request, response);
                                     }
                                 })
                                 .catch((error: ApiError) => this.throwError(error, request, response));
