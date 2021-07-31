@@ -3,7 +3,7 @@ import path from "path";
 import nodemailer, { Transporter } from "nodemailer";
 
 import { Attachment } from "nodemailer/lib/mailer";
-import { HashMap } from "alliance-sdk";
+import { HashMap } from "@tsalliance/sdk";
 
 export interface MailSMPTOptions {
     host: string;

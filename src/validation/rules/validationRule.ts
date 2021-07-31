@@ -1,4 +1,4 @@
-import { HashMap } from "alliance-sdk";
+import { HashMap } from "@tsalliance/sdk";
 import { UniqueValidationFunction } from "../functions/uniqueValidationFunction";
 
 export abstract class ValidationRule<T> {

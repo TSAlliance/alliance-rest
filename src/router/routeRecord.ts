@@ -1,4 +1,4 @@
-import { HashMap } from "alliance-sdk";
+import { HashMap } from "@tsalliance/sdk";
 import { RouteMethod } from "./routeMethod";
 
 export interface RouteRecord {

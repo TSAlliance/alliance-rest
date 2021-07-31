@@ -5,9 +5,9 @@ import { PasswordRule } from "./rules/passwordRule";
 import { UrlRule } from "./rules/urlRule";
 import { NumberRule } from "./rules/numberRule";
 
-import { ValidationException } from "../error/validationError";
+import { Errors } from "../error/errors";
 
-import { HashMap } from "alliance-sdk";
+import { HashMap } from "@tsalliance/sdk";
 
 export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
@@ -55,7 +55,7 @@ export class Validator {
             });
 
         if (errors.length > 0) {
-            throw new ValidationException(errors);
+            throw new Errors.ValidationException(errors);
         }
     }
 }

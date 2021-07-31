@@ -3,16 +3,13 @@ import Express, { Request, Response } from "express";
 import { RouteGroup } from "./routeGroup";
 import { CurrentRoute } from "./currentRoute";
 
-import { UnauthorizedError } from "../error/unauthorizedError";
-import { PermissionDeniedError } from "../error/permissionDeniedError";
-import { UnknownEndpointError } from "../error/unknownEndpointError";
+import { Errors } from "../error/errors";
 import { RouteRecord } from "./routeRecord";
 import { RouterOptions } from "./routerOptions";
 import { Controller } from "../controller/controller";
 import { ErrorHandler } from "../error/errorHandler";
 
-import { NotFoundError } from "../error/notFoundError";
-import { ApiError, Pageable, UserDetails, UserDetailsService } from "alliance-sdk";
+import { ApiError, Pageable, UserDetails, UserDetailsService } from "@tsalliance/sdk";
 
 export class TSRouter {
     private static _instance: TSRouter = undefined;
@@ -62,7 +59,7 @@ export class TSRouter {
                             ) {
                                 let resolvedResult = this._userDetailsService.resolveUserIdFromRequest(request);
                                 if (!resolvedResult) {
-                                    if (!isAuthOptional) throw new UnauthorizedError();
+                                    if (!isAuthOptional) throw new Errors.UnauthorizedError();
                                 } else {
                                     userDetails = await this._userDetailsService?.loadUserDetails(resolvedResult);
                                 }
@@ -71,7 +68,7 @@ export class TSRouter {
                                 if (!isAuthOptional) {
                                     // Check if user was authenticated
                                     if (!userDetails.isAuthenticated) {
-                                        throw userDetails.authenticationError || new UnauthorizedError();
+                                        throw userDetails.authenticationError || new Errors.UnauthorizedError();
                                     }
 
                                     // Check permissions
@@ -81,7 +78,7 @@ export class TSRouter {
                                         ) &&
                                         !this.isOwnResource(request.params)
                                     ) {
-                                        throw new PermissionDeniedError();
+                                        throw new Errors.PermissionDeniedError();
                                     }
                                 }
                             }
@@ -101,7 +98,7 @@ export class TSRouter {
 
                             // Execute action on endpoint with current route as parameter
                             if (!controller[actionFn]) {
-                                throw new UnknownEndpointError();
+                                throw new Errors.UnknownEndpointError();
                             }
 
                             controller[actionFn](currentRoute)
@@ -112,7 +109,7 @@ export class TSRouter {
                                     try {
                                         if (data == null) {
                                             status = 404;
-                                            throw new NotFoundError();
+                                            throw new Errors.NotFoundError();
                                         } else {
                                             response
                                                 .status(status)

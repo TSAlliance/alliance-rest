@@ -1,4 +1,4 @@
-import { ApiError } from "alliance-sdk";
+import { ApiError } from "@tsalliance/sdk";
 import { Request, Response } from "express";
 
 export interface ErrorHandler {

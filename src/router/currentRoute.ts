@@ -1,6 +1,6 @@
 import { RouteRecord } from "./routeRecord";
 import { Request, Response } from "express";
-import { Pageable, UserDetails } from "alliance-sdk";
+import { Pageable, UserDetails } from "@tsalliance/sdk";
 
 export interface CurrentRoute extends RouteRecord {
     request: Request;
