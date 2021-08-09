@@ -10,3 +10,6 @@ export { ApiExceptionFilter, ApiError, ValidationException };
 import { Validator } from "./validator/validator";
 import { ValidationRule } from "./validator/rules/validationRule";
 export { Validator, ValidationRule };
+
+import { RestRepository } from "./repository/restRepository";
+export { RestRepository };
