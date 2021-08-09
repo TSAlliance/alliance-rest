@@ -1,6 +1,6 @@
 {
   "name": "@tsalliance/rest",
-  "version": "1.0.4",
+  "version": "2.0.1",
   "description": "This library adds validation and error handling to NestJS applications",
   "author": "zettee <cedric.zitzmann@gmail.com>",
   "main": "lib/index.js",
@@ -20,13 +20,10 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/typeorm": "^8.0.1",
     "@tsalliance/sdk": "^1.0.1",
+    "rxjs": "^7.2.0",
     "bcrypt": "^5.0.1",
     "crypto-js": "^4.0.0",
-    "express": "^4.17.1",
-    "nodemailer": "^6.6.1",
-    "sequelize": "^6.6.2",
-    "sequelize-typescript": "^2.1.0",
-    "winston": "^3.3.3"
+    "nodemailer": "^6.6.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",

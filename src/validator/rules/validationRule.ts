@@ -139,7 +139,7 @@ export abstract class ValidationRule<T> {
             } else {
                 needsValidation = true;
             }
-        }        
+        }
 
         return needsValidation;
     }

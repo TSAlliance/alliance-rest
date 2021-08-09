@@ -19,7 +19,7 @@ export interface ValidationError {
     errors: FailedRule[];
 }
 
-@Injectable({scope: Scope.REQUEST})
+@Injectable({ scope: Scope.REQUEST })
 export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
 
@@ -59,7 +59,7 @@ export class Validator {
             .map((rule) => {
                 return {
                     fieldname: rule.fieldname,
-                    errors: rule.failedTests
+                    errors: rule.failedTests,
                 };
             });
 
