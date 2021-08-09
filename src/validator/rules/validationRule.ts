@@ -1,11 +1,12 @@
 import { HashMap } from "@tsalliance/sdk";
 import { UniqueValidationFunction } from "../functions/uniqueValidationFunction";
+import { FailedRule } from "../validator";
 
 export abstract class ValidationRule<T> {
     private readonly _subject: T;
     private readonly _fieldname: string;
-    private readonly _failedTests: Array<HashMap<any>> = [];
-    private _required: boolean = false;
+    private readonly _failedTests: Array<FailedRule> = [];
+    private _required = false;
     private _uniqueValidationFunction: UniqueValidationFunction<T> = null;
 
     constructor(subject: T, fieldname: string) {
@@ -13,7 +14,7 @@ export abstract class ValidationRule<T> {
         this._fieldname = fieldname;
     }
 
-    public get failedTests(): Array<HashMap<any>> {
+    public get failedTests(): Array<FailedRule> {
         return this._failedTests;
     }
 
@@ -21,11 +22,11 @@ export abstract class ValidationRule<T> {
         return this._fieldname;
     }
 
-    public get subject(): T {
+    protected get subject(): T {
         return this._subject;
     }
 
-    public get isRequired(): boolean {
+    protected get isRequired(): boolean {
         return this._required;
     }
 
@@ -69,7 +70,7 @@ export abstract class ValidationRule<T> {
     /**
      * Execute test
      */
-    public abstract test(): void;
+    protected abstract test(): void;
 
     /**
      * Register a failed test in the registry
@@ -77,7 +78,7 @@ export abstract class ValidationRule<T> {
      * @param foundValue Value that is present
      * @param expectedValue Value that was expected
      */
-    public putFailedTest(testName: string, foundValue: any, expectedValue: any): void {
+    protected putFailedTest(testName: string, foundValue: any, expectedValue: any): void {
         this.checkForAndDeleteExistingTest(testName);
 
         this._failedTests.push({
@@ -130,7 +131,7 @@ export abstract class ValidationRule<T> {
         }
 
         // Check if subject is null, return false
-        if (this._subject == null) {
+        if (this._subject == undefined || this._subject == null) {
             return false;
         } else {
             if (typeof this._subject == "string") {
@@ -138,7 +139,7 @@ export abstract class ValidationRule<T> {
             } else {
                 needsValidation = true;
             }
-        }
+        }        
 
         return needsValidation;
     }

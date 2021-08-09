@@ -1,10 +1,10 @@
 import { ValidationRule } from "./validationRule";
 
 export class TextRule extends ValidationRule<string> {
-    private _maxLen: number = -1;
-    private _minLen: number = -1;
-    private _alpha: boolean = false;
-    private _alphaNum: boolean = false;
+    private _maxLen = -1;
+    private _minLen = -1;
+    private _alpha = false;
+    private _alphaNum = false;
 
     /**
      * Set maximum length of subject
@@ -42,7 +42,7 @@ export class TextRule extends ValidationRule<string> {
         return this;
     }
 
-    public test(): void {
+    protected test(): void {
         if (this.subject.length == 0) {
             if (this.isRequired) {
                 this.putFailedTest("required", false, true);

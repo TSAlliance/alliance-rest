@@ -1,8 +1,8 @@
 import { ValidationRule } from "./validationRule";
 
 export class NumberRule extends ValidationRule<number> {
-    private _max: number = -1;
-    private _min: number = -1;
+    private _max = -1;
+    private _min = -1;
 
     /**
      * Set maximum length of number
@@ -22,7 +22,7 @@ export class NumberRule extends ValidationRule<number> {
         return this;
     }
 
-    public test(): void {
+    protected test(): void {
         if (this._max != -1 && this.subject > this._max) {
             this.putFailedTest("max", this.subject, this._max);
         }

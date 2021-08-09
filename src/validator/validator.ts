@@ -5,57 +5,66 @@ import { PasswordRule } from "./rules/passwordRule";
 import { UrlRule } from "./rules/urlRule";
 import { NumberRule } from "./rules/numberRule";
 
-import { Errors } from "../error/errors";
+import { Injectable, Scope } from "@nestjs/common";
+import { ValidationException } from "../error/errors";
 
-import { HashMap } from "@tsalliance/sdk";
+export interface FailedRule {
+    name: string;
+    expected: any;
+    found: any;
+}
 
+export interface ValidationError {
+    fieldname: string;
+    errors: FailedRule[];
+}
+
+@Injectable({scope: Scope.REQUEST})
 export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
 
     public text(fieldname: string, subject: string): TextRule {
-        let rule = new TextRule(subject, fieldname);
+        const rule = new TextRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }
 
     public email(fieldname: string, subject: string): EmailRule {
-        let rule = new EmailRule(subject, fieldname);
+        const rule = new EmailRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }
 
     public password(fieldname: string, subject: string): PasswordRule {
-        let rule = new PasswordRule(subject, fieldname);
+        const rule = new PasswordRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }
 
     public url(fieldname: string, subject: string): UrlRule {
-        let rule = new UrlRule(subject, fieldname);
+        const rule = new UrlRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }
 
     public number(fieldname: string, subject: number): NumberRule {
-        let rule = new NumberRule(subject, fieldname);
+        const rule = new NumberRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }
 
     public throwErrors(): void {
-        let errors: Array<HashMap<any>> = this._rules
+        const errors: Array<ValidationError> = this._rules
             .filter((rule) => rule.failedTests.length > 0)
             .map((rule) => {
-                let details: HashMap<any> = {};
-
-                details["fieldname"] = rule.fieldname;
-                details["failedTests"] = rule.failedTests;
-
-                return details;
+                return {
+                    fieldname: rule.fieldname,
+                    errors: rule.failedTests
+                };
             });
 
         if (errors.length > 0) {
-            throw new Errors.ValidationException(errors);
+            throw new ValidationException(errors);
         }
     }
 }
