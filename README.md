@@ -1,5 +1,28 @@
 # Alliance REST Library
-This library adds validation and error handling to NestJS applications
+This library basically adds validation and error handling to NestJS applications. However, the package also offers some bonus features that are explained below.<br>
+For you to successfully use the package you have to understand the basics of [NestJS](https://docs.nestjs.com/) and the basic concepts of [typeorm](https://typeorm.io/), like the repository structure.
+
+## Installation
+```
+npm install @tsalliance/rest
+```
+
+## Using the RestRepository
+The package provides some basic methods for typeorm's repository structure. To use all the methods you have to extend the `RestRepository<T>` class.
+```javascript
+import { RestRepository } from "@tsalliance/rest"
+
+@EntityRepository()
+export class UserRepository extends RestRepository<T> {
+
+}
+```
+Now you have access to following methods:
+| Method                                           | Returned type          | Description                                                                                     |
+| ------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `exists(options?: FindManyOptions<T>)`           | `Promise<boolean>`     | This method counts entities in a table and if it count's more than `0` it evaluates to true
+
+<i><b>More will be added in the future</b></i>
 
 ## Validation
 The validator class is an injectable class in NestJS. Because of this you can make use of dependency injection.
