@@ -21,6 +21,7 @@ Now you have access to following methods:
 | Method                                           | Returned type          | Description                                                                                     |
 | ------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
 | `exists(options?: FindManyOptions<T>)`           | `Promise<boolean>`     | This method counts entities in a table and if it count's more than `0` it evaluates to true
+| `listAll(pageable: Pageable, options?: FindManyOptions<T>)`           | `Promise<Page<T>>`     | This method retrieves a page from the database given the defined paging values
 
 <i><b>More will be added in the future</b></i>
 
