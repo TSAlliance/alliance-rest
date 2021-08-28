@@ -7,9 +7,9 @@ import { ApiError, ValidationException } from "./error/errors";
 import { ApiExceptionFilter } from "./error/exceptionFilter";
 export { ApiExceptionFilter, ApiError, ValidationException };
 
-import { ValidatorModule, ValidatorService } from "./validator/validator";
+import { ValidatorModule, Validator } from "./validator/validator";
 import { ValidationRule } from "./validator/rules/validationRule";
-export { ValidatorModule, ValidatorService, ValidationRule };
+export { ValidatorModule, Validator, ValidationRule };
 
 import { RestRepository } from "./repository/restRepository";
 export { RestRepository };

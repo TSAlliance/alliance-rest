@@ -5,7 +5,7 @@ import { PasswordRule } from "./rules/passwordRule";
 import { UrlRule } from "./rules/urlRule";
 import { NumberRule } from "./rules/numberRule";
 
-import { Injectable, Module, Scope } from "@nestjs/common";
+import { Global, Injectable, Module, Scope } from "@nestjs/common";
 import { ValidationException } from "../error/errors";
 
 export interface FailedRule {
@@ -20,7 +20,7 @@ export interface ValidationError {
 }
 
 @Injectable({ scope: Scope.REQUEST })
-export class ValidatorService {
+export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
 
     public text(fieldname: string, subject: string): TextRule {
@@ -69,8 +69,9 @@ export class ValidatorService {
     }
 }
 
+@Global()
 @Module({
-    providers: [ ValidatorService ],
-    exports: [ ValidatorService ]
+    providers: [Validator],
+    exports: [Validator],
 })
 export class ValidatorModule {}
