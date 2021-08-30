@@ -20,7 +20,6 @@ export class RestRepository<T> extends PageableRepository<T> {
     }
 
     public async exists(options?: FindManyOptions<T>): Promise<boolean> {
-        this.findOne
         return !!(await this.findOne(options));
     }
 }
