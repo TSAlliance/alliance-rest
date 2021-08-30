@@ -7,6 +7,7 @@ import { NumberRule } from "./rules/numberRule";
 
 import { Global, Injectable, Module, Scope } from "@nestjs/common";
 import { ValidationException } from "../error/errors";
+import { DateRule } from "./rules/dateRule";
 
 export interface FailedRule {
     name: string;
@@ -49,6 +50,12 @@ export class Validator {
 
     public number(fieldname: string, subject: number): NumberRule {
         const rule = new NumberRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
+    }
+
+    public date(fieldname: string, subject: string): DateRule {
+        const rule = new DateRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }
