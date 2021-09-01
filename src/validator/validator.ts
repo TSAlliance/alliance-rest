@@ -76,11 +76,9 @@ export class Validator {
     }
 }
 
-export const Validation = createParamDecorator(
-    (data: unknown[], ctx: ExecutionContext): Validator => {        
-        return new Validator()
-    }
-);
+export const Validation = createParamDecorator((data: unknown[], ctx: ExecutionContext): Validator => {
+    return new Validator();
+});
 
 @Global()
 @Module({
