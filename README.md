@@ -22,40 +22,31 @@ Now you have access to following methods:
 | ------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
 | `exists(options?: FindManyOptions<T>)`           | `Promise<boolean>`     | This method counts entities in a table and if it count's more than `0` it evaluates to true
 | `listAll(pageable: Pageable, options?: FindManyOptions<T>)`           | `Promise<Page<T>>`     | This method retrieves a page from the database given the defined paging values
+| `findById(id: string \| number \| Date \| ObjectID \| FindId, options?: FindManyOptions<T>)` | `Promise<T>` | Better way of looking up database entries by their respective id. To search for an id with different column name you can pass an instance of FindId.
 
 <i><b>More will be added in the future</b></i>
 
 ## Validation
-The validator class is an injectable class in NestJS. Because of this you can make use of dependency injection.
+The `Validator` class used to be a `REQUEST` scoped injectable. However this approach caused some performance issues which is why a `@Validation()` decorator on parameter-level was introduced. Inside services or controllers you can now add this decorator before a parameter to make use of a unique validator instance every time the function is called. Below is an example on how this looks in practice:
 ```javascript
 // Important part
-import { Validator } from '@tsalliance/rest';
+import { Validation, Validator } from '@tsalliance/rest';
 
 @Injectable()
 export class ServiceClass {
-    // Important part
-    constructor(private validator: Validator){}
-}
-```
+    
+    public doSomething(@Validation() validator: Validator) {
+        // Use validator to validate things...
+        validator.text("message", data.title).alphaNum().minLen(3).maxLen(32).required().check();
 
-The validator as an per request scope, which means every instance of the validator is unique to a request.
-This makes using the validator pretty simple inside of service calls or controllers:
-```javascript
-// Important part
-import { Validator } from '@tsalliance/rest';
-
-@Injectable()
-export class ServiceClass {
-    // Important part
-    constructor(private validator: Validator){}
-
-    public async createHelloWorld(data: HelloWorldData) {
-        // The "message" represents the field name inside of the HelloWorldData object
-        this.validator.text("message", data.title).alphaNum().minLen(3).maxLen(32).required().check();
-        this.validator.throwErrors();
+        // and to throw errors on failure
+        validator.throwErrors();
     }
 }
 ```
+
+Additionally to that the `Validator` still exists as an `Injectable`. To use it globally you can import the `ValidatorModule` in your `app.module.ts`. But keep in mind, that injected instances of the `Validator` are not unique anymore. That means, failed tests are accumulated all over the application and never cleared.
+
 The `check()` at the end of the line returns a boolean, so you could even check if something did successfully validate to directly use the validated data before throwing errors:
 ```javascript
 createHelloWorld(data: HelloWorldData) {

@@ -5,7 +5,7 @@ import { PasswordRule } from "./rules/passwordRule";
 import { UrlRule } from "./rules/urlRule";
 import { NumberRule } from "./rules/numberRule";
 
-import { Global, Injectable, Module, Scope, createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { Global, Injectable, Module, createParamDecorator, ExecutionContext } from "@nestjs/common";
 import { ValidationException } from "../error/errors";
 import { DateRule } from "./rules/dateRule";
 
@@ -20,13 +20,8 @@ export interface ValidationError {
     errors: FailedRule[];
 }
 
-export const Validator = createParamDecorator(
-    (data: unknown[], ctx: ExecutionContext): ValidatorService => {        
-        return new ValidatorService()
-    }
-);
-
-export class ValidatorService {
+@Injectable()
+export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
 
     public text(fieldname: string, subject: string): TextRule {
@@ -80,6 +75,12 @@ export class ValidatorService {
         }
     }
 }
+
+export const Validation = createParamDecorator(
+    (data: unknown[], ctx: ExecutionContext): Validator => {        
+        return new Validator()
+    }
+);
 
 @Global()
 @Module({
