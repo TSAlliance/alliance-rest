@@ -1,16 +1,15 @@
 import { ValidationRule } from "./validationRule";
 
-export type BetweenDates = { before: Date, after: Date}
+export type BetweenDates = { before: Date; after: Date };
 
 export class DateRule extends ValidationRule<string> {
-
     private betweenDates?: BetweenDates;
     private afterDate?: Date;
     private beforeDate?: Date;
 
     public after(date: Date | string): this {
-        if(typeof date == "string") {
-            date = new Date(date)
+        if (typeof date == "string") {
+            date = new Date(date);
         }
 
         this.afterDate = date;
@@ -18,8 +17,8 @@ export class DateRule extends ValidationRule<string> {
     }
 
     public before(date: Date | string): this {
-        if(typeof date == "string") {
-            date = new Date(date)
+        if (typeof date == "string") {
+            date = new Date(date);
         }
 
         this.beforeDate = date;
@@ -49,9 +48,12 @@ export class DateRule extends ValidationRule<string> {
             this.putFailedTest("before", this.subject, this.beforeDate);
         }
 
-        if (this.betweenDates && (subject.getTime() > this.betweenDates.after.getTime() || subject.getTime() < this.betweenDates.after.getTime())) {
+        if (
+            this.betweenDates &&
+            (subject.getTime() > this.betweenDates.after.getTime() ||
+                subject.getTime() < this.betweenDates.after.getTime())
+        ) {
             this.putFailedTest("between", this.subject, this.betweenDates);
         }
     }
-
 }
