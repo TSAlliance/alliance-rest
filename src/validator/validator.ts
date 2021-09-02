@@ -5,7 +5,7 @@ import { PasswordRule } from "./rules/passwordRule";
 import { UrlRule } from "./rules/urlRule";
 import { NumberRule } from "./rules/numberRule";
 
-import { Global, Injectable, Module, Scope } from "@nestjs/common";
+import { Global, Injectable, Module, createParamDecorator, ExecutionContext } from "@nestjs/common";
 import { ValidationException } from "../error/errors";
 import { DateRule } from "./rules/dateRule";
 
@@ -20,7 +20,7 @@ export interface ValidationError {
     errors: FailedRule[];
 }
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class Validator {
     private _rules: Array<ValidationRule<any>> = [];
 
@@ -75,6 +75,10 @@ export class Validator {
         }
     }
 }
+
+export const Validation = createParamDecorator((data: unknown[], ctx: ExecutionContext): Validator => {
+    return new Validator();
+});
 
 @Global()
 @Module({
