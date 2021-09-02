@@ -5,6 +5,7 @@ export class TextRule extends ValidationRule<string> {
     private _minLen = -1;
     private _alpha = false;
     private _alphaNum = false;
+    private _notBlank = false;
 
     /**
      * Set maximum length of subject
@@ -12,6 +13,14 @@ export class TextRule extends ValidationRule<string> {
      */
     public maxLen(len: number): this {
         this._maxLen = len;
+        return this;
+    }
+
+    /**
+     * Check if subject string is not empty.
+     */
+    public notBlank(): this {
+        this._notBlank = true;
         return this;
     }
 
@@ -63,6 +72,9 @@ export class TextRule extends ValidationRule<string> {
         }
         if (this._alphaNum && !this.subject.match("^[a-zA-Z0-9]*$")) {
             this.putFailedTest("alphaNum", false, true);
+        }
+        if (this._notBlank && (!!!this.subject || /^\s*$/.test(this.subject))) {
+            this.putFailedTest("notBlank", false, true);
         }
     }
 }
