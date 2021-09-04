@@ -27,15 +27,17 @@ Now you have access to following methods:
 <i><b>More will be added in the future</b></i>
 
 ## Validation
-The `Validator` class used to be a `REQUEST` scoped injectable. However this approach caused some performance issues which is why a `@Validation()` decorator on parameter-level was introduced. Inside services or controllers you can now add this decorator before a parameter to make use of a unique validator instance every time the function is called. Below is an example on how this looks in practice:
+### Using the validator as Object
+The `Validator` class used to be a `REQUEST` scoped injectable. However this approach caused some performance issues which is why it must now be instantiated inside method calls. However there is still the possibility to inject the validator, but only as non-request-scoped injectable. Below is an example on how this looks in practice:
 ```javascript
 // Important part
-import { Validation, Validator } from '@tsalliance/rest';
+import { Validator } from '@tsalliance/rest';
 
 @Injectable()
 export class ServiceClass {
     
-    public doSomething(@Validation() validator: Validator) {
+    public doSomething() {
+        const validator = new Validator();
         // Use validator to validate things...
         validator.text("message", data.title).alphaNum().minLen(3).maxLen(32).required().check();
 
@@ -45,13 +47,46 @@ export class ServiceClass {
 }
 ```
 
-Additionally to that the `Validator` still exists as an `Injectable`. To use it globally you can import the `ValidatorModule` in your `app.module.ts`. But keep in mind, that injected instances of the `Validator` are not unique anymore. That means, failed tests are accumulated all over the application and never cleared.
+### Using the validator as Injectable
+Additionally, the `Validator` can be used as an `Injectable`. To use it globally you can import the `ValidatorModule` in your `app.module.ts`. But keep in mind, that using the validator as an injectible, it becomes inefficient, because the Injectable that injects the validator becomes `REQUEST` scoped compulsorily in the nature of NestJS.
+```javascript
+// Important part
+import { Validator } from '@tsalliance/rest';
 
-The `check()` at the end of the line returns a boolean, so you could even check if something did successfully validate to directly use the validated data before throwing errors:
+@Injectable()
+export class ServiceClass {
+    constructor(private validator: Validator)
+    
+    public doSomething() {
+        // Use validator to validate things...
+        this.validator.text("message", data.title).alphaNum().minLen(3).maxLen(32).required().check();
+
+        // and to throw errors on failure
+        this.validator.throwErrors();
+    }
+}
+```
+
+### Validating required and optional values
+
+The `check()` at the end of a line triggers the validation process and returns a boolean to check if something did successfully validate. Check the example below:
 ```javascript
 createHelloWorld(data: HelloWorldData) {
-    // The "message" represents the field name inside of the HelloWorldData object
+    // "message" represents the field name inside of the HelloWorldData object
     if(this.validator.text("message", data.title).alphaNum().minLen(3).maxLen(32).required().check()) {
+        // Do something...
+    }
+    this.validator.throwErrors();
+}
+```
+
+The example above show how to make fields inside of objects required. As you can see this is done by adding the `required()` rule to the chain.
+If you leave that rule out, the above example would still validate to `false` if the value (e.g.: `data.title`) is undefined or something similar. The only difference is, that when appending `required()`, internally an error is added to a list. So when calling `this.validator.throwErrors()` these collected errors are thrown. But leaving out the required rule does not throw such an `ValidationException`. This is especially useful for validating optional values. To give a better understanding, check out this example on how to validate optional values:
+```javascript
+createHelloWorld(data: HelloWorldData) {
+    // "message" represents the field name inside of the HelloWorldData object
+    // Notice the missing required() here
+    if(this.validator.text("message", data.title).alphaNum().minLen(3).maxLen(32).check()) {
         // Do something...
     }
     this.validator.throwErrors();
