@@ -55,14 +55,22 @@ export abstract class ValidationRule<T> {
      * @throws ValidationException ValidationException
      */
     public check(): boolean {
-        if (this.needsValidation() && this.testInternal()) {
+        console.log(this.needsValidation());
+        console.log(this.testInternal());
+
+        if (this.testInternal()) {
+            this.test();
+        } else {
+            return false;
+        }
+        /*if (this.needsValidation() && this.testInternal()) {
             this.test();
         } else {
             if (this._required) {
                 this.putFailedTest("required", false, this._required);
                 return false;
             }
-        }
+        }*/
 
         return this._failedTests.length <= 0;
     }
@@ -107,8 +115,14 @@ export abstract class ValidationRule<T> {
      * Perform internal tests like testing for null or unique
      */
     private testInternal(): boolean {
-        if (this._subject == null) {
-            this.putFailedTest("required", false, true);
+        // Check subject for null values
+        if (!this._subject) {
+            // If value is required, add failed test
+            if (this._required) {
+                this.putFailedTest("required", false, true);
+            }
+
+            // In all cases validate to false
             return false;
         }
 
