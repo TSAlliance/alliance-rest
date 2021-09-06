@@ -13,14 +13,3 @@ export { ValidatorModule, Validator, ValidationRule };
 
 import { RestRepository } from "./repository/restRepository";
 export { RestRepository };
-
-const validator = new Validator();
-console.log("Valid? >> ", validator.text("test", null).check()); // False, but does not throw error
-console.log("Valid? >> ", validator.text("test", "hello").check()); // True
-console.log("Valid? >> ", validator.text("test", undefined).required().check()); // False and collects an error to throw below
-
-try {
-    validator.throwErrors();
-} catch (err) {
-    console.log(err);
-}
