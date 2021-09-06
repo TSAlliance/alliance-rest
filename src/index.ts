@@ -3,9 +3,22 @@ import { MailUtil } from "./util/mailSender";
 import { RandomUtil } from "./util/randomUtil";
 export { RandomUtil, MailUtil, CryptUtil };
 
-import { ApiError, ValidationException } from "./error/errors";
+import {
+    ApiError,
+    ValidationException,
+    SessionExpiredException,
+    InsufficientPermissionException,
+    CredentialsMismatchException,
+} from "./error/errors";
 import { ApiExceptionFilter } from "./error/exceptionFilter";
-export { ApiExceptionFilter, ApiError, ValidationException };
+export {
+    ApiExceptionFilter,
+    ApiError,
+    ValidationException,
+    SessionExpiredException,
+    InsufficientPermissionException,
+    CredentialsMismatchException,
+};
 
 import { ValidatorModule, Validator } from "./validator/validator";
 import { ValidationRule } from "./validator/rules/validationRule";

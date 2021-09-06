@@ -43,3 +43,21 @@ export class ValidationException extends ApiError {
         return response;
     }
 }
+
+export class CredentialsMismatchException extends ApiError {
+    constructor() {
+        super("Your credentials don't match.", 403, "CREDENTIALS_MISMATCH", false);
+    }
+}
+
+export class SessionExpiredException extends ApiError {
+    constructor() {
+        super("Your session is expired.", 403, "SESSION_EXPIRED", false);
+    }
+}
+
+export class InsufficientPermissionException extends ApiError {
+    constructor() {
+        super("Insufficient permission.", 403, "INSUFFICIENT_PERMISSION", false);
+    }
+}
