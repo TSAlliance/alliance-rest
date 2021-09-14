@@ -61,3 +61,9 @@ export class InsufficientPermissionException extends ApiError {
         super("Insufficient permission.", 403, "INSUFFICIENT_PERMISSION", false);
     }
 }
+
+export class AccountNotFoundException extends ApiError {
+    constructor() {
+        super("Your account does not exist.", 403, "ACCOUNT_NOT_FOUND", false);
+    }
+}

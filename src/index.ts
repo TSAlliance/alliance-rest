@@ -9,6 +9,7 @@ import {
     SessionExpiredException,
     InsufficientPermissionException,
     CredentialsMismatchException,
+    AccountNotFoundException,
 } from "./error/errors";
 import { ApiExceptionFilter } from "./error/exceptionFilter";
 export {
@@ -18,6 +19,7 @@ export {
     SessionExpiredException,
     InsufficientPermissionException,
     CredentialsMismatchException,
+    AccountNotFoundException,
 };
 
 import { ValidatorModule, Validator } from "./validator/validator";
