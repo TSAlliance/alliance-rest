@@ -27,4 +27,5 @@ import { ValidationRule } from "./validator/rules/validationRule";
 export { ValidatorModule, Validator, ValidationRule };
 
 import { RestRepository } from "./repository/restRepository";
-export { RestRepository };
+import { RestService } from "./service/restService";
+export { RestRepository, RestService };
