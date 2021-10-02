@@ -1,7 +1,7 @@
 import { HttpException } from "@nestjs/common";
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from "@nestjs/common";
+import { ApiError } from "@tsalliance/sdk";
 import { EntityNotFoundError } from "typeorm";
-import { ApiError } from "./errors";
 
 type FilterOptions = {
     debug: boolean;
@@ -25,23 +25,29 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
         let error: ApiError;
 
-        if (exception instanceof ApiError) {
+        if (exception.errorId) {
             if (this.options?.debug) console.log("Identified error as instance of ApiError");
             error = exception;
         } else if (exception instanceof EntityNotFoundError) {
             if (this.options?.debug) console.log("Identified error as instance of EntityNotFoundError");
-            error = new ApiError("Requested resource not found", 404, "NOT_FOUND", false);
+            error = new ApiError("Requested resource not found", "NOT_FOUND", { statusCode: 404, isCritical: false });
         } else if (exception instanceof HttpException) {
             if (this.options?.debug) console.log("Identified error as instance of HttpException");
-            error = new ApiError(exception.message, exception.getStatus(), exception.name.toUpperCase(), false);
+            error = new ApiError(exception.message, exception.name.toUpperCase(), {
+                statusCode: exception.getStatus(),
+                isCritical: false,
+            });
         } else {
             if (this.options?.debug) console.log("Identified error as internal javascript error");
-            error = new ApiError(exception.message, HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", true);
+            error = new ApiError(exception.message, "INTERNAL_ERROR", {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                isCritical: false,
+            });
             console.error(exception);
         }
 
         if (this.options?.debug) console.log("Resulting ApiError object:", error);
-        response.status(error.getStatus()).json({
+        response.status(error.statusCode || 500).json({
             ...error.toResponse(),
             path: request.path,
         });

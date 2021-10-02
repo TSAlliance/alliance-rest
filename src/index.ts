@@ -4,7 +4,6 @@ import { RandomUtil } from "./util/randomUtil";
 export { RandomUtil, MailUtil, CryptUtil };
 
 import {
-    ApiError,
     ValidationException,
     SessionExpiredException,
     InsufficientPermissionException,
@@ -12,14 +11,15 @@ import {
     AccountNotFoundException,
 } from "./error/errors";
 import { ApiExceptionFilter } from "./error/exceptionFilter";
+import { ApiError } from "@tsalliance/sdk";
 export {
     ApiExceptionFilter,
-    ApiError,
     ValidationException,
     SessionExpiredException,
     InsufficientPermissionException,
     CredentialsMismatchException,
     AccountNotFoundException,
+    ApiError,
 };
 
 import { ValidatorModule, Validator } from "./validator/validator";
