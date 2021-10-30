@@ -1,6 +1,8 @@
 import { ApiError } from "@tsalliance/sdk";
 import { ValidationError } from "../validator/validator";
 
+// TODO: Rework error system
+
 export class ValidationException extends ApiError {
     private errors?: ValidationError[];
 
