@@ -8,6 +8,7 @@ import { NumberRule } from "./rules/numberRule";
 import { Global, Injectable, Module, Scope } from "@nestjs/common";
 import { ValidationException } from "../error/errors";
 import { DateRule } from "./rules/dateRule";
+import { HexColorRule } from "./rules/hexColorRule";
 
 export interface FailedRule {
     name: string;
@@ -44,6 +45,12 @@ export class Validator {
 
     public url(fieldname: string, subject: string): UrlRule {
         const rule = new UrlRule(subject, fieldname);
+        this._rules.push(rule);
+        return rule;
+    }
+
+    public hexColor(fieldname: string, subject: string): HexColorRule {
+        const rule = new HexColorRule(subject, fieldname);
         this._rules.push(rule);
         return rule;
     }

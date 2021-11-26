@@ -1,6 +1,6 @@
 {
   "name": "@tsalliance/rest",
-  "version": "2.0.53",
+  "version": "2.0.56",
   "description": "This library adds validation and error handling to NestJS applications",
   "author": "zettee <cedric.zitzmann@gmail.com>",
   "main": "dist/index.js",
@@ -36,6 +36,7 @@
     "@types/nodemailer": "^6.4.2",
     "nodemon": "^2.0.12",
     "prettier": "^2.3.0",
+    "reflect-metadata": "^0.1.13",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },

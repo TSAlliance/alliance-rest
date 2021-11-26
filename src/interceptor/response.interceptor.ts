@@ -2,6 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { map, Observable } from "rxjs";
 import { CANREAD_KEY, PERMISSION_KEY } from "../decorator/canRead.decorator";
 import { RestAccount } from "../models/account.model";
+import "reflect-metadata";
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
