@@ -1,8 +1,10 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { map, Observable } from "rxjs";
-import { CANREAD_KEY, PERMISSION_KEY } from "../decorator/canRead.decorator";
 import { RestAccount } from "../models/account.model";
+import { PROPERTY_PERMISSION_META_KEY } from "../decorator/canRead.decorator";
 import "reflect-metadata";
+import { type } from "os";
+import { IPermission } from "..";
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
@@ -91,7 +93,11 @@ export class ResponseInterceptor implements NestInterceptor {
      * @returns True or False
      */
     private needsPermission(target: any, propertyKey: string) {
-        return !!Reflect.getMetadata(PERMISSION_KEY, target, propertyKey);
+        const value = Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey);
+        if (typeof value == "undefined" || value == null) return false;
+        if (typeof value == "boolean") return !value;
+
+        return !!value;
     }
 
     /**
@@ -101,15 +107,26 @@ export class ResponseInterceptor implements NestInterceptor {
      * @returns True or False
      */
     private canRead(target: any, propertyKey: string): boolean {
-        const canRead = Reflect.getMetadata(CANREAD_KEY, target, propertyKey);
-        if (typeof canRead === "undefined" || canRead === null) {
-            return true;
-        }
+        const value = Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey);
 
-        return canRead;
+        if (typeof value == "undefined" || value == null) return true;
+        if (typeof value == "boolean") return !value;
+
+        return !!value;
     }
 
     private getRequiredPermissions(target: any, propertyKey: string): string[] {
-        return Reflect.getMetadata(PERMISSION_KEY, target, propertyKey) as string[];
+        const value = Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey);
+
+        if (typeof value == "undefined" || value == null) return [];
+        if (typeof value == "boolean") return [];
+        if (typeof value == "string") return [value];
+        if (typeof value == "object") return [(value as IPermission).value];
+
+        if (Array.isArray(value) && typeof value[0] == "object") {
+            return value.map((permission: IPermission) => permission.value);
+        }
+
+        return Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey) as string[];
     }
 }

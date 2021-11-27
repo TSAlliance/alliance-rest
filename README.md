@@ -7,6 +7,67 @@ For you to successfully use the package you have to understand the basics of [Ne
 npm install @tsalliance/rest
 ```
 
+## Permissions
+This package offers some tools to limit access to certain endpoints (``@CanAccess()``). This allows to define permissions on properties in your Entities (``@CanRead()``). You can either allow reading properties, forbid access completely or restrict to just certain types of requests by
+making authentication required or by setting permissions. Both decorator types work the same.
+For all use cases, this can look similar to the following examples:
+```typescript
+// Using @CanAccess() on Controller routes
+@Controller('invite')
+export class InviteController {
+    constructor(private readonly inviteService: InviteService) {}
+
+    @Post()
+    @CanAccess(PermissionCatalog.INVITES_WRITE)
+    public create(@Body() createInviteDto: CreateInviteDto, @Authentication() authentication: RestAccount) {
+        return this.inviteService.create(createInviteDto, authentication);
+    }
+
+    @Get(':id')
+    public findOne(@Param('id') id: string) {
+        return this.inviteService.findById(id);
+    }
+
+    @Put(':id')
+    @CanAccess(PermissionCatalog.INVITES_WRITE)
+    public update(@Param('id') id: string, @Body() updateInviteDto: UpdateInviteDto) {
+        return this.inviteService.update(id, updateInviteDto);
+    }
+
+    @Delete(':id')
+    @CanAccess(PermissionCatalog.INVITES_WRITE)
+    public remove(@Param('id') id: string) {
+        return this.inviteService.delete(id);
+    }
+}
+
+// Using @CanRead() on Entity Properties
+export class Invite {
+    @PrimaryColumn("varchar", { length: 6 })
+    public id: string;
+
+    @CanRead([PermissionCatalog.INVITES_READ, PermissionCatalog.INVITES_WRITE])
+    @Column({ nullable: false, default: 0 })
+    public maxUses: number;
+
+    @CanRead([PermissionCatalog.INVITES_READ, PermissionCatalog.INVITES_WRITE])
+    @Column({ nullable: false, default: 0 })
+    public uses: number;
+
+    @CanRead([PermissionCatalog.INVITES_READ, PermissionCatalog.INVITES_WRITE])
+    @CreateDateColumn()
+    public createdAt: Date;
+
+    @CanRead([PermissionCatalog.INVITES_READ, PermissionCatalog.INVITES_WRITE])
+    @CreateDateColumn()
+    public updatedAt: Date;
+
+    @CanRead([PermissionCatalog.INVITES_READ, PermissionCatalog.INVITES_WRITE])
+    @Column({ nullable: true })
+    public expiresAt?: Date;
+}
+```
+
 ## Using the RestRepository
 The package provides some basic methods for typeorm's repository structure. To use all the methods you have to extend the `RestRepository<T>` class.
 ```javascript

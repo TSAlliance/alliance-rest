@@ -1,21 +1,13 @@
-export const PERMISSION_KEY = "requiredPermission";
-export const CANREAD_KEY = "canRead";
+import { IPermission } from "../models/permission.model";
+
+export const PROPERTY_PERMISSION_META_KEY = "requiredPermission";
 
 /**
- * Define the permission(s) needed to read this value (to send in responses)
- * @param permission Permissions (multiple or single one). If multiple are defined, this will evaluate as "or".
+ * Class-Property decorator to limit access to types of data in entities.
+ * Define certain permissions or disable access to properties for every request by setting the value to false.
+ * Applying a list of permissions results in allowed access to the property if one or more permissions are a match.
+ * @param permission Define a permission, set of permissions or disable access completely by setting this to "false".
  */
-export const CanReadPermission = (...permission: any[]) => {
-    return Reflect.metadata(PERMISSION_KEY, permission);
-};
-
-/**
- * Decorator to define if this value can never be read (to send in responses).
- * @param value True, if value is readable or false if value is purely for internal use.
- */
-export function CanRead(value = true) {
-    return Reflect.metadata(CANREAD_KEY, value);
+export function CanRead(permission: string | string[] | boolean | IPermission | IPermission[] = true) {
+    return Reflect.metadata(PROPERTY_PERMISSION_META_KEY, permission);
 }
-/*export const CanRead = (value = true) => {
-    return Reflect.metadata(CANREAD_KEY, value);
-};*/
