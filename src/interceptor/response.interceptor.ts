@@ -2,9 +2,9 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { map, Observable } from "rxjs";
 import { RestAccount } from "../models/account.model";
 import { PROPERTY_PERMISSION_META_KEY } from "../decorator/canRead.decorator";
-import "reflect-metadata";
-import { type } from "os";
 import { IPermission } from "..";
+
+import "reflect-metadata";
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
@@ -117,14 +117,16 @@ export class ResponseInterceptor implements NestInterceptor {
 
     private getRequiredPermissions(target: any, propertyKey: string): string[] {
         const value = Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey);
-
         if (typeof value == "undefined" || value == null) return [];
-        if (typeof value == "boolean") return [];
-        if (typeof value == "string") return [value];
-        if (typeof value == "object") return [(value as IPermission).value];
 
-        if (Array.isArray(value) && typeof value[0] == "object") {
-            return value.map((permission: IPermission) => permission.value);
+        if (Array.isArray(value)) {
+            if (typeof value[0] == "string") return value as string[];
+            if (typeof value[0] == "object") return (value as IPermission[]).map((v) => v.value);
+            return [];
+        } else {
+            if (typeof value == "boolean") return [];
+            if (typeof value == "string") return [value];
+            if (typeof value == "object") return [(value as IPermission).value];
         }
 
         return Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey) as string[];

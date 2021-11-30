@@ -10,8 +10,16 @@ import { PROPERTY_PERMISSION_META_KEY } from "./canRead.decorator";
  * @param permission Define a permission, set of permissions or disable access completely by setting this to "false".
  */
 export function CanAccess(permission: string | string[] | boolean | IPermission | IPermission[]) {
-    return applyDecorators(
-        SetMetadata(PROPERTY_PERMISSION_META_KEY, permission),
-        ApiBearerAuth ? ApiBearerAuth() : undefined,
-    );
+    let p: string[] | boolean = undefined;
+
+    if (Array.isArray(permission)) {
+        if (typeof permission[0] == "string") p = permission as string[];
+        if (typeof permission[0] == "object") p = (permission as IPermission[]).map((v) => v.value);
+    } else {
+        if (typeof permission == "boolean") p = permission as boolean;
+        if (typeof permission == "string") p = [permission as string];
+        if (typeof permission == "object") p = [(permission as IPermission).value];
+    }
+
+    return applyDecorators(SetMetadata(PROPERTY_PERMISSION_META_KEY, p), ApiBearerAuth ? ApiBearerAuth() : undefined);
 }
