@@ -1,9 +1,9 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { map, Observable } from "rxjs";
-import { RestAccount } from "../models/account.model";
-import { PROPERTY_PERMISSION_META_KEY } from "../decorator/canRead.decorator";
 
 import "reflect-metadata";
+import { RestAccount } from "../models/account.model";
+import { PROPERTY_PERMISSION_META_KEY } from "../decorator/canRead.decorator";
 import { IPermission } from "../models/permission.model";
 
 @Injectable()
@@ -15,13 +15,9 @@ export class ResponseInterceptor implements NestInterceptor {
 
                 const isPage = !!response["elements"];
                 const account: any = ctx.switchToHttp().getRequest().authentication;
+                const data = isPage ? response["elements"] : response;
 
-                if (isPage) {
-                    this.eraseNotPermittedProperties(response["elements"], account);
-                } else {
-                    this.eraseNotPermittedProperties(response, account);
-                }
-
+                this.eraseNotPermittedProperties(data, account);
                 return response;
             }),
         );
@@ -31,16 +27,19 @@ export class ResponseInterceptor implements NestInterceptor {
         obj: Record<string, any> | Array<Record<string, any>>,
         account: RestAccount,
     ): any {
-        if (Array.isArray(obj)) {
-            for (const element of obj) {
-                this.eraseProperties(element, account);
-            }
-        } else {
-            this.eraseProperties(obj, account);
-        }
+        this.eraseProperties(obj, account);
     }
 
-    private eraseProperties(obj: Record<string, any>, account: RestAccount) {
+    private eraseProperties(obj: Record<string, any> | Record<string, any>[], account: RestAccount) {
+        // If the obj is an array and contains only non-object values,
+        // they do not get removed, as they cannot have @CanRead decorators.
+        if (Array.isArray(obj) && typeof obj[0] != "object") {
+            return;
+        }
+
+        // obj is actually an object.
+        // This must be checked, as it can happen that array
+        // values may not be objects but eg.: strings instead.
         for (const key in obj) {
             if (typeof obj[key] === "undefined" || obj[key] === null) {
                 obj[key] = undefined;
@@ -49,7 +48,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
             // If no permission is set
             // ==> Property is allowed to be read.
-            if (this.needsPermission(obj, key) || !this.canRead(obj, key)) {
+            if (this.isPropertyRequiringPermission(obj, key) || !this.canRead(obj, key)) {
                 this.eraseProperty(obj, key, account);
             }
 
@@ -73,14 +72,27 @@ export class ResponseInterceptor implements NestInterceptor {
         const canRead = this.canRead(target, propertyKey);
 
         if (!canRead) {
+            // Account is not allowed to read this property.
+            // Therefor it gets removed from the object.
             target[propertyKey] = undefined;
         } else {
-            if (!this.needsPermission(target, propertyKey) && canRead) return;
+            // Check if property is requiring permission to be read.
+            // If not, then nothing happens to the value.
+            if (!this.isPropertyRequiringPermission(target, propertyKey) && canRead) {
+                return;
+            }
 
-            const permissionGranted = !!this.getRequiredPermissions(target, propertyKey).find((permission) =>
-                account?.hasPermission(permission),
-            );
+            // At this point, it is clear that a property needs an account to fulfill certain permissions.
+            // All permissions required by this property are collected and it is checked if the account fulfills
+            // one of the permissions specified.
+
+            const permissionGranted = !!this.getRequiredPermissions(target, propertyKey).find((permission) => {
+                return account?.hasPermission(permission);
+            });
+
+            // Check if account fullfills at least one permission
             if (!permissionGranted) {
+                // If not, delete the value from the object.
                 target[propertyKey] = undefined;
             }
         }
@@ -92,9 +104,15 @@ export class ResponseInterceptor implements NestInterceptor {
      * @param propertyKey Target property of object
      * @returns True or False
      */
-    private needsPermission(target: any, propertyKey: string) {
+    private isPropertyRequiringPermission(target: any, propertyKey: string) {
         const value = Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey);
+
+        // No permission defined --> Value does not require permission to be read
         if (typeof value == "undefined" || value == null) return false;
+
+        // Boolean value was set, meaning reading the property is disabled or enabled
+        // Because @CanRead(false) causes the value to never be read by any account,
+        // we have to return the negative value.
         if (typeof value == "boolean") return !value;
 
         return !!value;
@@ -115,6 +133,10 @@ export class ResponseInterceptor implements NestInterceptor {
         return !!value;
     }
 
+    /**
+     * Get the required permissions list from metadata.
+     * @returns string[]
+     */
     private getRequiredPermissions(target: any, propertyKey: string): string[] {
         const value = Reflect.getMetadata(PROPERTY_PERMISSION_META_KEY, target, propertyKey);
         if (typeof value == "undefined" || value == null) return [];
