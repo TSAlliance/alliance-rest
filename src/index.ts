@@ -5,16 +5,14 @@ import {
     CredentialsMismatchException,
     AccountNotFoundException,
 } from "./error/errors";
-import { ApiExceptionFilter } from "./error/exceptionFilter";
-import { ApiError } from "@tsalliance/sdk";
+import { AllianceExceptionFilter } from "./error/exceptionFilter";
 export {
-    ApiExceptionFilter,
+    AllianceExceptionFilter,
     ValidationException,
     SessionExpiredException,
     InsufficientPermissionException,
     CredentialsMismatchException,
     AccountNotFoundException,
-    ApiError,
 };
 
 export { ValidatorModule, Validator } from "./validator/validator";
@@ -32,3 +30,6 @@ export * from "./decorator/authentication.decorator";
 export * from "./decorator/canAccess.decorator";
 export * from "./decorator/canRead.decorator";
 export * from "./models/permission.model";
+
+export * from "./rest.module";
+export * from "./constants";
