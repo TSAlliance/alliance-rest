@@ -1,38 +1,25 @@
-import { ApiError } from "@tsalliance/sdk";
-import { ValidationError } from "../validator/validator";
+import { AllianceError } from "./error";
 
-// TODO: Rework error system
-
-export class ValidationException extends ApiError {
-    private errors?: ValidationError[];
-
-    constructor(errors?: ValidationError[]) {
-        super("Failed validating a value.", "VALIDATION_ERROR", { statusCode: 400, isCritical: false });
-        this.errors = errors;
-        this.details = this.errors;
+export class CredentialsMismatchException extends AllianceError {
+    constructor() {
+        super("Your credentials don't match.", "CREDENTIALS_MISMATCH", 403);
     }
 }
 
-export class CredentialsMismatchException extends ApiError {
+export class SessionExpiredException extends AllianceError {
     constructor() {
-        super("Your credentials don't match.", "CREDENTIALS_MISMATCH", { statusCode: 403, isCritical: false });
+        super("Your session is expired.", "SESSION_EXPIRED", 403);
     }
 }
 
-export class SessionExpiredException extends ApiError {
+export class InsufficientPermissionException extends AllianceError {
     constructor() {
-        super("Your session is expired.", "SESSION_EXPIRED", { statusCode: 403, isCritical: false });
+        super("Insufficient permission.", "INSUFFICIENT_PERMISSION", 403);
     }
 }
 
-export class InsufficientPermissionException extends ApiError {
+export class AccountNotFoundException extends AllianceError {
     constructor() {
-        super("Insufficient permission.", "INSUFFICIENT_PERMISSION", { statusCode: 403, isCritical: false });
-    }
-}
-
-export class AccountNotFoundException extends ApiError {
-    constructor() {
-        super("Your account does not exist.", "ACCOUNT_NOT_FOUND", { statusCode: 403, isCritical: false });
+        super("Your account does not exist.", "ACCOUNT_NOT_FOUND", 403);
     }
 }

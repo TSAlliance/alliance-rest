@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 
 export class RandomUtil {
     /**
-     * Generate a new credential hash for users
+     * Generate a new credential hash for users whith a length of 8.
      * @returns Hex-String
      */
     public static randomCredentialHash(): string {

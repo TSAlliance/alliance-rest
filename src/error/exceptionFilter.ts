@@ -1,8 +1,9 @@
 import { HttpException, Inject, Logger } from "@nestjs/common";
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from "@nestjs/common";
-import { ApiError } from "@tsalliance/sdk";
 import { EntityNotFoundError } from "typeorm";
-import { AllianceRestOptions, REST_CONFIG_OPTIONS } from "..";
+import { REST_CONFIG_OPTIONS } from "../constants";
+import { AllianceRestOptions } from "../rest.module";
+import { AllianceError } from "./error";
 
 @Catch()
 export class AllianceExceptionFilter implements ExceptionFilter {
@@ -18,31 +19,25 @@ export class AllianceExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse();
         const request = ctx.getRequest();
 
-        let error: ApiError;
+        let error: AllianceError;
 
-        if (exception.errorId) {
+        if (exception.id) {
             if (this.options.logging) this.logger.log("Identified error as instance of ApiError");
             error = exception;
         } else if (exception instanceof EntityNotFoundError) {
             if (this.options.logging) this.logger.log("Identified error as instance of EntityNotFoundError");
-            error = new ApiError("Requested resource not found", "NOT_FOUND", { statusCode: 404, isCritical: false });
+            error = new AllianceError("Requested resource not found", "NOT_FOUND", 404);
         } else if (exception instanceof HttpException) {
             if (this.options.logging) this.logger.log("Identified error as instance of HttpException");
-            error = new ApiError(exception.message, exception.name.toUpperCase(), {
-                statusCode: exception.getStatus(),
-                isCritical: false,
-            });
+            error = new AllianceError(exception.message, exception.name.toUpperCase(), exception.getStatus());
         } else {
             if (this.options.logging) this.logger.log("Identified error as internal javascript error");
-            error = new ApiError(exception.message, "INTERNAL_ERROR", {
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                isCritical: false,
-            });
-            console.error(exception);
+            if (this.options.logging) this.logger.error(exception);
+            error = new AllianceError(exception.message, "INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if (this.options.logging) this.logger.error("Resulting ApiError object:", error);
-        response.status(error.statusCode || 500).json({
+        response.status(error.getStatus() || 500).json({
             ...error.toResponse(),
             path: request.path,
         });
